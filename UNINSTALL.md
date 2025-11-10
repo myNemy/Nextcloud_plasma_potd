@@ -1,53 +1,52 @@
-# Come rimuovere il provider Nextcloud
+# How to Remove the Nextcloud Provider
 
-Se l'installazione non ha funzionato o vuoi rimuovere il provider, segui questi passaggi:
+If the installation didn't work or you want to remove the provider, follow these steps:
 
-## 1. Rimuovere i file installati
+## 1. Remove Installed Files
 
 ```bash
-# Rimuovere il plugin .so da /usr/lib (posizione corretta)
+# Remove the .so plugin from /usr/lib (correct location)
 sudo rm -f /usr/lib/qt6/plugins/potd/plasma_potd_nextcloudprovider.so
 
-# Rimuovere il file JSON da /usr/lib (posizione corretta)
+# Remove the JSON file from /usr/lib (correct location)
 sudo rm -f /usr/lib/qt6/plugins/potd/nextcloudprovider.json
 
-# Rimuovere il plugin .so da /usr/local/lib (se installato lì per errore)
+# Remove the .so plugin from /usr/local/lib (if installed there by mistake)
 sudo rm -f /usr/local/lib/qt6/plugins/potd/plasma_potd_nextcloudprovider.so
 
-# Rimuovere il file JSON da /usr/local/lib (se installato lì per errore)
+# Remove the JSON file from /usr/local/lib (if installed there by mistake)
 sudo rm -f /usr/local/lib/qt6/plugins/potd/nextcloudprovider.json
 
-# Rimuovere il file JSON installato in posizione sbagliata (/potd/)
+# Remove the JSON file installed in wrong location (/potd/)
 sudo rm -f /potd/nextcloudprovider.json
 sudo rmdir /potd 2>/dev/null || true
 ```
 
-## 2. Rimuovere la configurazione (opzionale)
+## 2. Remove Configuration (Optional)
 
 ```bash
-# Rimuovere il file di configurazione del provider
+# Remove the provider configuration file
 rm -f ~/.config/plasma_engine_potd/nextcloudprovider.conf
 ```
 
-## 3. Riavviare Plasma
+## 3. Restart Plasma
 
 ```bash
 killall plasmashell && kstart plasmashell
 ```
 
-## 4. Verificare che sia stato rimosso
+## 4. Verify Removal
 
 ```bash
-# Verificare che i file non esistano più
+# Verify that files no longer exist
 ls -la /usr/lib/qt6/plugins/potd/ | grep nextcloud
-ls -la /potd/ 2>/dev/null || echo "OK: /potd/ non esiste"
+ls -la /potd/ 2>/dev/null || echo "OK: /potd/ does not exist"
 ```
 
-## 5. Rimuovere i file di build (opzionale)
+## 5. Remove Build Files (Optional)
 
 ```bash
-# Se vuoi pulire anche i file di compilazione
+# If you want to clean up compilation files too
 cd /home/nemeyes/nextcloud-wallpaper
 rm -rf build/
 ```
-

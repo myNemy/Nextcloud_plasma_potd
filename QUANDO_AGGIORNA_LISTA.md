@@ -1,85 +1,84 @@
-# Quando viene creata e aggiornata la lista delle immagini
+# When the Image List is Created and Updated
 
-## Creazione della lista
+## List Creation
 
-La lista viene creata **una sola volta** quando:
+The list is created **only once** when:
 
-1. **Il provider viene istanziato** (costruttore `NextcloudProvider::NextcloudProvider`)
-   - Questo avviene quando:
-     - Plasma si avvia e il provider Nextcloud è selezionato
-     - Cambi il provider da un altro a Nextcloud
-     - Riavvii Plasma
+1. **The provider is instantiated** (constructor `NextcloudProvider::NextcloudProvider`)
+   - This happens when:
+     - Plasma starts and the Nextcloud provider is selected
+     - You change provider from another to Nextcloud
+     - You restart Plasma
 
-2. **Nel costruttore viene chiamato:**
-   - `loadConfig()` - carica la configurazione
-   - `fetchImagesFromWebDAV()` o `fetchImagesFromLocal()` - crea la lista
+2. **In the constructor the following is called:**
+   - `loadConfig()` - loads configuration
+   - `fetchImagesFromWebDAV()` or `fetchImagesFromLocal()` - creates the list
 
-## Aggiornamento della lista
+## List Update
 
-La lista **NON viene aggiornata automaticamente**. Rimane in memoria finché:
+The list **is NOT updated automatically**. It remains in memory until:
 
-- Il provider viene distrutto (quando cambi provider o riavvii Plasma)
-- Viene chiamato manualmente `refresh()` quando la lista è vuota
+- The provider is destroyed (when you change provider or restart Plasma)
+- `refresh()` is manually called when the list is empty
 
-## Comportamento attuale
+## Current Behavior
 
 ```
-Avvio Plasma / Selezioni Nextcloud
+Plasma Start / Select Nextcloud
     ↓
-Costruttore NextcloudProvider()
+NextcloudProvider() Constructor
     ↓
 loadConfig()
     ↓
-fetchImagesFromWebDAV() o fetchImagesFromLocal()
+fetchImagesFromWebDAV() or fetchImagesFromLocal()
     ↓
-Crea lista m_imageUrls (TUTTE le immagini)
+Create m_imageUrls list (ALL images)
     ↓
-Randomizza lista (std::shuffle)
+Randomize list (std::shuffle)
     ↓
-Seleziona prima immagine casuale
+Select first random image
     ↓
-Provider viene distrutto da potd dopo finished()
+Provider destroyed by potd after finished()
 ```
 
-## Quando la lista viene ricaricata
+## When the List is Reloaded
 
-La lista viene ricaricata **solo** se:
+The list is reloaded **only** if:
 
-1. **Chiami `refresh()` e la lista è vuota:**
+1. **You call `refresh()` and the list is empty:**
    ```cpp
    void NextcloudProvider::refresh() {
        if (m_imageUrls.isEmpty()) {
-           // Ricarica da sorgente
-           fetchImagesFromWebDAV() o fetchImagesFromLocal()
+           // Reload from source
+           fetchImagesFromWebDAV() or fetchImagesFromLocal()
        } else {
-           // Solo seleziona nuova immagine dalla lista esistente
+           // Only select new image from existing list
            selectRandomImage();
        }
    }
    ```
 
-2. **Il provider viene distrutto e ricreato:**
-   - Cambi provider e torni a Nextcloud
-   - Riavvii Plasma
+2. **The provider is destroyed and recreated:**
+   - Change provider and return to Nextcloud
+   - Restart Plasma
 
-## Implicazioni
+## Implications
 
-- ✅ **Vantaggio**: La lista rimane in memoria, cambiare immagine è veloce (solo selezione casuale)
-- ❌ **Svantaggio**: Se aggiungi nuove immagini su Nextcloud, non vengono viste finché non ricarichi
+- ✅ **Advantage**: The list remains in memory, changing image is fast (just random selection)
+- ❌ **Disadvantage**: If you add new images to Nextcloud, they won't be seen until you reload
 
-## Come ricaricare la lista
+## How to Reload the List
 
-Per vedere nuove immagini aggiunte su Nextcloud, basta:
+To see new images added to Nextcloud, just:
 
-1. **Riavviare la sessione Plasma:**
+1. **Restart the Plasma session:**
    ```bash
    killall plasmashell && kstart plasmashell
    ```
 
-2. **Cambiare provider e tornare a Nextcloud:**
-   - Vai in Impostazioni → Sfondo → Immagine del giorno
-   - Cambia provider (es. Bing)
-   - Torna a Nextcloud
+2. **Change provider and return to Nextcloud:**
+   - Go to Settings → Background → Picture of the Day
+   - Change provider (e.g. Bing)
+   - Return to Nextcloud
 
-La lista verrà ricaricata automaticamente quando il provider viene ricreato.
-
+The list will be automatically reloaded when the provider is recreated.

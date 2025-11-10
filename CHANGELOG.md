@@ -2,18 +2,17 @@
 
 ## [1.0.0] - 2024
 
-### Aggiunto
-- Provider Nextcloud per KDE Plasma Picture of the Day
-- Supporto WebDAV per connessione diretta a Nextcloud
-- Supporto percorso locale per cartelle sincronizzate
-- Autenticazione con App Password
-- Selezione casuale di immagini
-- Ricerca ricorsiva in tutte le sottocartelle
-- Opzione MaxImages per limitare il numero di immagini caricate
-- Identifier unico per immagine per bypassare la cache di potd
+### Added
+- Nextcloud provider for KDE Plasma Picture of the Day
+- WebDAV support for direct connection to Nextcloud
+- Local path support for synchronized folders
+- App Password authentication
+- Random image selection
+- Recursive search in all subfolders
+- MaxImages option to limit the number of images loaded
+- Unique identifier per image to bypass potd cache
 
-### Note
-- La rotazione automatica non è disponibile perché potd distrugge il provider dopo `finished()`
-- Per cambiare immagine, riavviare Plasma o cambiare provider
-- Ogni volta che il provider viene ricreato, seleziona una nuova immagine casuale
-
+### Notes
+- Automatic rotation is not available because potd destroys the provider after `finished()`
+- To change image, restart Plasma or change provider
+- Each time the provider is recreated, it selects a new random image

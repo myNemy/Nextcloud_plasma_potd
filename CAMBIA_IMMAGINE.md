@@ -1,64 +1,63 @@
-# Come cambiare l'immagine del provider Nextcloud
+# How to Change the Nextcloud Provider Image
 
-Dopo che il provider ha caricato la prima immagine, ci sono diversi modi per cambiarne una:
+After the provider has loaded the first image, there are several ways to change it:
 
-## Metodo 1: Riavviare Plasma (più semplice)
+## Method 1: Restart Plasma (Simplest)
 
 ```bash
 killall plasmashell && kstart plasmashell
 ```
 
-Questo forza il provider a ricaricare e selezionare una nuova immagine casuale.
+This forces the provider to reload and select a new random image.
 
-## Metodo 2: Cambiare provider e tornare a Nextcloud
+## Method 2: Change Provider and Return to Nextcloud
 
-1. Vai in **Impostazioni → Aspetto → Sfondo**
-2. Seleziona "Picture of the Day"
-3. Cambia il provider (es. seleziona "Bing")
-4. Aspetta che carichi
-5. Torna a selezionare "Nextcloud"
+1. Go to **Settings → Appearance → Background**
+2. Select "Picture of the Day"
+3. Change the provider (e.g. select "Bing")
+4. Wait for it to load
+5. Return to selecting "Nextcloud"
 
-Questo forza un nuovo caricamento.
+This forces a new load.
 
-## Metodo 3: Script per cambiare rapidamente
+## Method 3: Script for Quick Change
 
-Crea uno script `~/bin/nextcloud-wallpaper-refresh.sh`:
+Create a script `~/bin/nextcloud-wallpaper-refresh.sh`:
 
 ```bash
 #!/bin/bash
-# Forza il cambio dell'immagine Nextcloud
+# Force Nextcloud image change
 
-# Metodo 1: Riavvia solo plasmashell (più veloce)
+# Method 1: Restart only plasmashell (faster)
 killall plasmashell && kstart plasmashell
 
-# Oppure metodo 2: Toccando il file di configurazione (se supportato)
+# Or method 2: Touching the configuration file (if supported)
 # touch ~/.config/plasma_engine_potd/nextcloudprovider.conf
 ```
 
-Rendilo eseguibile:
+Make it executable:
 ```bash
 chmod +x ~/bin/nextcloud-wallpaper-refresh.sh
 ```
 
-Poi puoi chiamarlo quando vuoi cambiare immagine.
+Then you can call it when you want to change the image.
 
-## ⚠️ Rotazione automatica NON disponibile
+## ⚠️ Automatic Rotation NOT Available
 
-**IMPORTANTE**: La rotazione automatica tramite timer NON è possibile perché potd distrugge il provider dopo aver caricato l'immagine. Il timer verrebbe distrutto prima di poter scattare.
+**IMPORTANT**: Automatic rotation via timer is NOT possible because potd destroys the provider after loading the image. The timer would be destroyed before it can fire.
 
-Per cambiare immagine, devi usare i metodi manuali sopra (riavviare Plasma o cambiare provider).
+To change the image, you must use the manual methods above (restart Plasma or change provider).
 
-## Nota tecnica
+## Technical Note
 
-Il provider ha un metodo `refresh()` che può selezionare una nuova immagine casuale dalla lista già caricata, ma per usarlo serve modificare il backend di potd per esporre questa funzionalità nell'interfaccia QML.
+The provider has a `refresh()` method that can select a new random image from the already loaded list, but to use it requires modifying the potd backend to expose this functionality in the QML interface.
 
-## Suggerimento
+## Tip
 
-Se cambi spesso immagine, il metodo più veloce è creare un alias nel tuo `.bashrc`:
+If you change images often, the fastest method is to create an alias in your `.bashrc`:
 
 ```bash
 alias nextcloud-refresh="killall plasmashell && kstart plasmashell"
 ```
 
-Poi puoi semplicemente eseguire `nextcloud-refresh` nel terminale.
-
+Then you can simply run `nextcloud-refresh` in the terminal.

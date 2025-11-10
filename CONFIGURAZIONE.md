@@ -1,44 +1,44 @@
-# Come configurare il Provider Nextcloud
+# How to Configure the Nextcloud Provider
 
-Il provider Nextcloud è apparso nella lista! Ora devi configurarlo.
+The Nextcloud provider has appeared in the list! Now you need to configure it.
 
-## Metodo 1: Script interattivo (consigliato)
+## Method 1: Interactive Script (Recommended)
 
 ```bash
-# Esegui lo script di configurazione
+# Run the configuration script
 bash /tmp/setup_nextcloud_config.sh
 ```
 
-Lo script ti chiederà:
-- URL Nextcloud (es. `https://nextcloud.example.com`)
-- Percorso WebDAV (es. `/remote.php/dav/files/USERNAME/Immagini`)
+The script will ask you:
+- Nextcloud URL (e.g. `https://nextcloud.example.com`)
+- WebDAV Path (e.g. `/remote.php/dav/files/USERNAME/Images`)
 - Username
-- Password o App Password
-- Se vuoi usare un percorso locale sincronizzato
+- Password or App Password
+- Whether you want to use a locally synchronized path
 
-## Metodo 2: Configurazione manuale
+## Method 2: Manual Configuration
 
-Crea il file `~/.config/plasma_engine_potd/nextcloudprovider.conf`:
+Create the file `~/.config/plasma_engine_potd/nextcloudprovider.conf`:
 
 ```bash
 mkdir -p ~/.config/plasma_engine_potd
 nano ~/.config/plasma_engine_potd/nextcloudprovider.conf
 ```
 
-Incolla questo contenuto e modifica i valori:
+Paste this content and modify the values:
 
 ```ini
 [Nextcloud]
 Url=https://nextcloud.example.com
-Path=/remote.php/dav/files/USERNAME/Immagini
-Username=tuo_username
-Password=tua_app_password
+Path=/remote.php/dav/files/USERNAME/Images
+Username=your_username
+Password=your_app_password
 UseLocalPath=false
 LocalPath=
-MaxImages=0  # Numero massimo di immagini da caricare (0 = illimitato)
+MaxImages=0  # Maximum number of images to load (0 = unlimited)
 ```
 
-### Per usare percorso locale sincronizzato:
+### To use locally synchronized path:
 
 ```ini
 [Nextcloud]
@@ -47,107 +47,106 @@ Path=
 Username=
 Password=
 UseLocalPath=true
-LocalPath=/home/user/Nextcloud/Immagini
+LocalPath=/home/user/Nextcloud/Images
 ```
 
-## Dettagli configurazione
+## Configuration Details
 
-### URL Nextcloud
-L'URL completo del tuo server Nextcloud, es.:
+### Nextcloud URL
+The complete URL of your Nextcloud server, e.g.:
 - `https://nextcloud.example.com`
-- `https://cloud.miodominio.it`
+- `https://cloud.mydomain.com`
 
-### Percorso WebDAV
-Il percorso WebDAV della cartella contenente le immagini. Formato:
+### WebDAV Path
+The WebDAV path of the folder containing images. Format:
 ```
-/remote.php/dav/files/USERNAME/NomeCartella
+/remote.php/dav/files/USERNAME/FolderName
 ```
 
-Esempi:
-- `/remote.php/dav/files/mario/Immagini`
+Examples:
+- `/remote.php/dav/files/mario/Images`
 - `/remote.php/dav/files/mario/Wallpapers`
 
 ### Username
-Il tuo username Nextcloud.
+Your Nextcloud username.
 
-### Password o App Password
-**Consigliato: usa un'App Password invece della password principale!**
+### Password or App Password
+**Recommended: use an App Password instead of your main password!**
 
-Per generare un'App Password:
-1. Vai su Nextcloud → Impostazioni → Sicurezza
-2. Scorri fino a "App Password"
-3. Genera una nuova App Password
-4. Usa quella password qui
+To generate an App Password:
+1. Go to Nextcloud → Settings → Security
+2. Scroll to "App Password"
+3. Generate a new App Password
+4. Use that password here
 
 ### UseLocalPath
-- `false` = usa WebDAV (connessione diretta)
-- `true` = usa cartella locale sincronizzata
+- `false` = use WebDAV (direct connection)
+- `true` = use locally synchronized folder
 
 ### LocalPath
-Se `UseLocalPath=true`, specifica il percorso locale della cartella sincronizzata, es.:
-- `/home/user/Nextcloud/Immagini`
+If `UseLocalPath=true`, specify the local path of the synchronized folder, e.g.:
+- `/home/user/Nextcloud/Images`
 - `/home/user/Documents/Nextcloud/Wallpapers`
 
 ### MaxImages
-Numero massimo di immagini da caricare dalla cartella:
-- `0` = illimitato (carica tutte le immagini trovate)
-- `100` = carica massimo 100 immagini
-- `1000` = carica massimo 1000 immagini
+Maximum number of images to load from the folder:
+- `0` = unlimited (loads all images found)
+- `100` = loads maximum 100 images
+- `1000` = loads maximum 1000 images
 
-**Nota**: Il limite viene applicato durante la scansione, quindi se imposti `MaxImages=100`, caricherà le prime 100 immagini trovate (non le migliori 100).
+**Note**: The limit is applied during scanning, so if you set `MaxImages=100`, it will load the first 100 images found (not the best 100).
 
-## Dopo la configurazione
+## After Configuration
 
-1. **Riavvia Plasma:**
+1. **Restart Plasma:**
    ```bash
    killall plasmashell && kstart plasmashell
    ```
 
-2. **Vai in Impostazioni → Aspetto → Sfondo**
+2. **Go to Settings → Appearance → Background**
 
-3. **Seleziona "Picture of the Day"**
+3. **Select "Picture of the Day"**
 
-4. **Nel menu "Provider" seleziona "Nextcloud"**
+4. **In the "Provider" menu select "Nextcloud"**
 
-5. Il provider dovrebbe caricare un'immagine dalla tua cartella Nextcloud!
+5. The provider should load an image from your Nextcloud folder!
 
-## Verifica configurazione
+## Verify Configuration
 
-Per verificare che la configurazione sia corretta:
+To verify that the configuration is correct:
 
 ```bash
 cat ~/.config/plasma_engine_potd/nextcloudprovider.conf
 ```
 
-## Risoluzione problemi
+## Troubleshooting
 
-### Il provider non carica immagini
+### Provider doesn't load images
 
-1. Verifica che il file di configurazione esista:
+1. Verify that the configuration file exists:
    ```bash
    ls -la ~/.config/plasma_engine_potd/nextcloudprovider.conf
    ```
 
-2. Controlla i log di Plasma:
+2. Check Plasma logs:
    ```bash
    journalctl --user -f | grep -i nextcloud
    ```
 
-3. Verifica che:
-   - L'URL sia corretto e raggiungibile
-   - Il percorso WebDAV sia corretto
-   - Username e password siano corretti
-   - La cartella contenga file immagine (jpg, png, etc.)
+3. Verify that:
+   - The URL is correct and reachable
+   - The WebDAV path is correct
+   - Username and password are correct
+   - The folder contains image files (jpg, png, etc.)
 
-### Errore di autenticazione
+### Authentication error
 
-- Assicurati di usare un'App Password, non la password principale
-- Verifica che username e password siano corretti
-- Controlla che l'URL non abbia uno slash finale
+- Make sure you're using an App Password, not your main password
+- Verify that username and password are correct
+- Check that the URL doesn't have a trailing slash
 
-### Nessuna immagine trovata
+### No images found
 
-- Verifica che la cartella contenga file immagine
-- Controlla i permessi della cartella su Nextcloud
-- Assicurati che il percorso WebDAV sia corretto
-
+- Verify that the folder contains image files
+- Check folder permissions on Nextcloud
+- Make sure the WebDAV path is correct

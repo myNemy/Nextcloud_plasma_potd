@@ -1,35 +1,35 @@
-# Nextcloud Provider per KDE Plasma Picture of the Day
+# Nextcloud Provider for KDE Plasma Picture of the Day
 
-Provider per il plugin "Picture of the Day" di KDE Plasma che permette di utilizzare immagini da Nextcloud.
+Provider for the KDE Plasma "Picture of the Day" plugin that allows using images from Nextcloud.
 
-## Caratteristiche
+## Features
 
-- ✅ **Supporto WebDAV**: Connessione diretta a Nextcloud via WebDAV
-- ✅ **Percorso Locale**: Supporto per cartelle sincronizzate localmente
-- ✅ **Autenticazione App Password**: Supporto per App Password di Nextcloud
-- ✅ **Selezione Casuale**: Seleziona immagini casualmente dalla cartella
-- ✅ **Ricerca Ricorsiva**: Cerca immagini in tutte le sottocartelle
-- ✅ **Limite Immagini**: Opzione per limitare il numero di immagini caricate
-- ⚠️ **Rotazione Automatica**: Non disponibile (vedi [CAMBIA_IMMAGINE.md](CAMBIA_IMMAGINE.md))
+- ✅ **WebDAV Support**: Direct connection to Nextcloud via WebDAV
+- ✅ **Local Path**: Support for locally synchronized folders
+- ✅ **App Password Authentication**: Support for Nextcloud App Passwords
+- ✅ **Random Selection**: Randomly selects images from the folder
+- ✅ **Recursive Search**: Searches for images in all subfolders
+- ✅ **Image Limit**: Option to limit the number of images loaded
+- ⚠️ **Automatic Rotation**: Not available (see [CAMBIA_IMMAGINE.md](CAMBIA_IMMAGINE.md))
 
-## Integrazione in kdeplasma-addons
+## Integration into kdeplasma-addons
 
-Per integrare questo provider nel repository kdeplasma-addons:
+To integrate this provider into the kdeplasma-addons repository:
 
-1. Copia i file nella struttura corretta:
+1. Copy files to the correct structure:
    ```bash
    cp plugins/providers/* /path/to/kdeplasma-addons/wallpapers/potd/plugins/providers/
    ```
 
-2. Aggiungi al `CMakeLists.txt`:
+2. Add to `CMakeLists.txt`:
    ```cmake
    kcoreaddons_add_plugin(plasma_potd_nextcloudprovider SOURCES nextcloudprovider.cpp INSTALL_NAMESPACE "potd")
    target_link_libraries(plasma_potd_nextcloudprovider plasmapotdprovidercore plasma_wallpaper_potdplugin_debug KF6::KIOCore KF6::CoreAddons Qt6::Network)
    ```
 
-3. Modifica `package/contents/ui/config.qml` per aggiungere i campi di configurazione quando `cfg_Provider === "nextcloud"`:
+3. Modify `package/contents/ui/config.qml` to add configuration fields when `cfg_Provider === "nextcloud"`:
 
-   Aggiungi dopo il selettore Provider (circa riga 124):
+   Add after the Provider selector (around line 124):
    ```qml
    // Nextcloud Configuration (visible only when Nextcloud provider is selected)
    Kirigami.Separator {
@@ -90,7 +90,7 @@ Per integrare questo provider nel repository kdeplasma-addons:
    }
    ```
 
-   E aggiungi un componente per gestire la configurazione (prima di `Kirigami.FormLayout`):
+   And add a component to manage configuration (before `Kirigami.FormLayout`):
    ```qml
    // Nextcloud Configuration Manager
    QtObject {
@@ -104,37 +104,37 @@ Per integrare questo provider nel repository kdeplasma-addons:
 
        function saveConfig() {
            const configPath = Qt.resolvedUrl("file://" + StandardPaths.writableLocation(StandardPaths.GenericConfigLocation) + "/plasma_engine_potd/nextcloudprovider.conf");
-           // Salva configurazione usando KConfig o altro metodo
+           // Save configuration using KConfig or other method
        }
 
        function loadConfig() {
-           // Carica configurazione
+           // Load configuration
        }
 
        Component.onCompleted: loadConfig()
    }
    ```
 
-## Configurazione
+## Configuration
 
-Il provider legge la configurazione da:
+The provider reads configuration from:
 `~/.config/plasma_engine_potd/nextcloudprovider.conf`
 
-Formato:
+Format:
 ```ini
 [Nextcloud]
 Url=https://nextcloud.example.com
-Path=/remote.php/dav/files/USERNAME/Immagini
+Path=/remote.php/dav/files/USERNAME/Images
 Username=username
 Password=app_password_here
 UseLocalPath=false
-LocalPath=/home/user/Nextcloud/Immagini
-MaxImages=0  # Numero massimo di immagini da caricare (0 = illimitato)
+LocalPath=/home/user/Nextcloud/Images
+MaxImages=0  # Maximum number of images to load (0 = unlimited)
 ```
 
-Vedi [CONFIGURAZIONE.md](CONFIGURAZIONE.md) per dettagli completi.
+See [CONFIGURAZIONE.md](CONFIGURAZIONE.md) for complete details.
 
-## Compilazione
+## Compilation
 
 ```bash
 cd /path/to/kdeplasma-addons
@@ -144,18 +144,17 @@ make
 sudo make install
 ```
 
-## Uso
+## Usage
 
-1. Vai in Impostazioni → Aspetto → Sfondo
-2. Seleziona "Picture of the Day"
-3. Nel menu "Provider" seleziona "Nextcloud"
-4. Configura il provider (vedi [CONFIGURAZIONE.md](CONFIGURAZIONE.md))
-5. Riavvia Plasma: `killall plasmashell && kstart plasmashell`
+1. Go to Settings → Appearance → Background
+2. Select "Picture of the Day"
+3. In the "Provider" menu select "Nextcloud"
+4. Configure the provider (see [CONFIGURAZIONE.md](CONFIGURAZIONE.md))
+5. Restart Plasma: `killall plasmashell && kstart plasmashell`
 
-## Documentazione
+## Documentation
 
-- [CONFIGURAZIONE.md](CONFIGURAZIONE.md) - Come configurare il provider
-- [CAMBIA_IMMAGINE.md](CAMBIA_IMMAGINE.md) - Come cambiare l'immagine
-- [QUANDO_AGGIORNA_LISTA.md](QUANDO_AGGIORNA_LISTA.md) - Quando viene creata/aggiornata la lista
-- [UNINSTALL.md](UNINSTALL.md) - Come rimuovere il provider
-
+- [CONFIGURAZIONE.md](CONFIGURAZIONE.md) - How to configure the provider
+- [CAMBIA_IMMAGINE.md](CAMBIA_IMMAGINE.md) - How to change the image
+- [QUANDO_AGGIORNA_LISTA.md](QUANDO_AGGIORNA_LISTA.md) - When the list is created/updated
+- [UNINSTALL.md](UNINSTALL.md) - How to remove the provider
