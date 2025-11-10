@@ -1,0 +1,40 @@
+# Build directory
+build/
+build-*/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# Compiled files
+*.so
+*.o
+*.a
+*.moc
+*_autogen/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+
+# Reference files (copied from kdeplasma-addons, not modified)
+plugins/providers/potdprovider.h
+

@@ -1,0 +1,22 @@
+feat: Nextcloud provider per KDE Plasma Picture of the Day
+
+Provider C++ per potd che permette di utilizzare immagini da Nextcloud
+tramite WebDAV o cartelle sincronizzate localmente.
+
+Caratteristiche principali:
+- Supporto WebDAV con autenticazione App Password
+- Supporto percorso locale sincronizzato
+- Ricerca ricorsiva in tutte le sottocartelle
+- Selezione casuale di immagini
+- Opzione MaxImages per limitare il numero di immagini
+- Identifier unico per immagine per bypassare cache potd
+
+Limitazioni:
+- Rotazione automatica non disponibile (potd distrugge il provider)
+- Per cambiare immagine: riavviare Plasma o cambiare provider
+
+File modificati:
+- plugins/providers/nextcloudprovider.{h,cpp} - Implementazione provider
+- plugins/providers/nextcloudprovider.json - Metadata provider
+- CMakeLists.txt - Build configuration
+- Documentazione completa in README.md, CONFIGURAZIONE.md, etc.

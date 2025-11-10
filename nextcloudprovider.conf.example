@@ -1,0 +1,28 @@
+[Nextcloud]
+# URL del server Nextcloud (es. https://nextcloud.example.com)
+Url=
+
+# Percorso WebDAV (es. /remote.php/dav/files/USERNAME/Immagini)
+# Formato: /remote.php/dav/files/USERNAME/Cartella
+Path=
+
+# Username Nextcloud
+Username=
+
+# Password o App Password (consigliato: usa App Password)
+# Per generare App Password: Impostazioni → Sicurezza → App Password
+Password=
+
+# Usa percorso locale sincronizzato invece di WebDAV
+# true = usa LocalPath, false = usa WebDAV
+UseLocalPath=false
+
+# Percorso locale della cartella sincronizzata (se UseLocalPath=true)
+# Es. /home/user/Nextcloud/Immagini
+LocalPath=
+
+# Numero massimo di immagini da caricare (0 = illimitato)
+# Es. 100 = carica massimo 100 immagini
+# Nota: il limite viene applicato durante la scansione
+MaxImages=0
+

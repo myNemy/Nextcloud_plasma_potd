@@ -1,0 +1,10 @@
+{
+    "KPlugin": {
+        "Icon": "folder-remote",
+        "Name": "Nextcloud",
+        "Name[it]": "Nextcloud",
+        "License": "GPL-2.0-or-later"
+    },
+    "X-KDE-PlasmaPoTDProvider-Identifier": "nextcloud"
+}
+
