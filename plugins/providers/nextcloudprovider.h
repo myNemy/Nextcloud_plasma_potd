@@ -12,8 +12,6 @@
 #include <QDir>
 #include <QNetworkReply>
 
-#include <KJob>
-
 /**
  * This class provides images from Nextcloud via WebDAV or local synchronized folder
  */
@@ -29,12 +27,6 @@ public:
      * Override identifier() to make each image unique and bypass potd cache
      */
     QString identifier() const override;
-    
-    /**
-     * Select a new random image from the already loaded list
-     * Can be called to change the current image
-     */
-    Q_INVOKABLE void refresh();
 
 private Q_SLOTS:
     void propfindRequestFinished(QNetworkReply *reply);

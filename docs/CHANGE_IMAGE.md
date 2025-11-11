@@ -50,7 +50,7 @@ To change the image, you must use the manual methods above (restart Plasma or ch
 
 ## Technical Note
 
-The provider has a `refresh()` method that can select a new random image from the already loaded list, but to use it requires modifying the potd backend to expose this functionality in the QML interface.
+The provider follows the standard PotdProvider API. To change the image, the provider must be recreated by restarting Plasma or changing providers.
 
 ## Tip
 

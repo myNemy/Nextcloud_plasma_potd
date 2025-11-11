@@ -19,7 +19,6 @@ The list is created **only once** when:
 The list **is NOT updated automatically**. It remains in memory until:
 
 - The provider is destroyed (when you change provider or restart Plasma)
-- `refresh()` is manually called when the list is empty
 
 ## Current Behavior
 
@@ -43,22 +42,9 @@ Provider destroyed by potd after finished()
 
 ## When the List is Reloaded
 
-The list is reloaded **only** if:
+The list is reloaded **only** when:
 
-1. **You call `refresh()` and the list is empty:**
-   ```cpp
-   void NextcloudProvider::refresh() {
-       if (m_imageUrls.isEmpty()) {
-           // Reload from source
-           fetchImagesFromWebDAV() or fetchImagesFromLocal()
-       } else {
-           // Only select new image from existing list
-           selectRandomImage();
-       }
-   }
-   ```
-
-2. **The provider is destroyed and recreated:**
+1. **The provider is destroyed and recreated:**
    - Change provider and return to Nextcloud
    - Restart Plasma
 

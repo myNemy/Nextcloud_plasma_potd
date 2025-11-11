@@ -23,7 +23,6 @@
 #include <algorithm>
 
 #include <KConfigGroup>
-#include <KIO/StoredTransferJob>
 #include <KPluginFactory>
 #include <KSharedConfig>
 
@@ -125,8 +124,18 @@ void NextcloudProvider::loadConfig()
     auto config = KSharedConfig::openConfig(configPath, KConfig::NoGlobals);
     KConfigGroup nextcloudGroup = config->group(QStringLiteral("Nextcloud"));
 
+    // Read and normalize URL: remove trailing slash
     m_nextcloudUrl = nextcloudGroup.readEntry("Url", QString());
+    if (m_nextcloudUrl.endsWith(QLatin1Char('/'))) {
+        m_nextcloudUrl.chop(1);
+    }
+    
+    // Read and normalize Path: ensure it starts with /
     m_nextcloudPath = nextcloudGroup.readEntry("Path", QString());
+    if (!m_nextcloudPath.startsWith(QLatin1Char('/'))) {
+        m_nextcloudPath = QLatin1Char('/') + m_nextcloudPath;
+    }
+    
     m_username = nextcloudGroup.readEntry("Username", QString());
     m_password = nextcloudGroup.readEntry("Password", QString());
     m_useLocalPath = nextcloudGroup.readEntry("UseLocalPath", false);
@@ -145,15 +154,9 @@ void NextcloudProvider::fetchImagesFromWebDAV()
     }
 
     // Build WebDAV URL
-    QString baseUrl = m_nextcloudUrl;
-    if (!baseUrl.endsWith(QLatin1Char('/'))) {
-        baseUrl += QLatin1Char('/');
-    }
-    QString path = m_nextcloudPath;
-    if (!path.startsWith(QLatin1Char('/'))) {
-        path = QLatin1Char('/') + path;
-    }
-    QUrl webdavUrl(baseUrl + path);
+    // m_nextcloudUrl is normalized (no trailing slash)
+    // m_nextcloudPath is normalized (starts with /)
+    QUrl webdavUrl(m_nextcloudUrl + m_nextcloudPath);
 
     // Create PROPFIND request with Depth: infinity to search recursively
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -202,14 +205,9 @@ void NextcloudProvider::propfindRequestFinished(QNetworkReply *reply)
     QXmlStreamReader xml(reply->readAll());
     m_imageUrls.clear();
 
+    // m_nextcloudUrl is normalized (no trailing slash)
+    // href from PROPFIND is relative to the WebDAV root and starts with /
     QString baseUrl = m_nextcloudUrl;
-    if (!baseUrl.endsWith(QLatin1Char('/'))) {
-        baseUrl += QLatin1Char('/');
-    }
-    QString path = m_nextcloudPath;
-    if (!path.startsWith(QLatin1Char('/'))) {
-        path = QLatin1Char('/') + path;
-    }
 
     const QRegularExpression imageExtRegex(QStringLiteral("\\.(jpg|jpeg|png|bmp|webp|gif)$"), QRegularExpression::CaseInsensitiveOption);
 
@@ -221,7 +219,11 @@ void NextcloudProvider::propfindRequestFinished(QNetworkReply *reply)
                 continue; // Skip directories
             }
             if (imageExtRegex.match(href).hasMatch()) {
+                // href from PROPFIND is relative to the WebDAV root and starts with /
+                // baseUrl has no trailing slash, so concatenation is: baseUrl + href
+                // Example: "https://nemeyes.xyz" + "/remote.php/dav/files/..." = "https://nemeyes.xyz/remote.php/..."
                 QString fullUrl = baseUrl + href;
+                qCDebug(WALLPAPERPOTD) << "Building URL - baseUrl:" << baseUrl << "href:" << href << "fullUrl:" << fullUrl;
                 m_imageUrls.append(fullUrl);
                 
                 // Limit the number of images if MaxImages is set
@@ -285,21 +287,6 @@ void NextcloudProvider::fetchImagesFromLocal()
     selectRandomImage();
 }
 
-void NextcloudProvider::refresh()
-{
-    if (m_imageUrls.isEmpty()) {
-        // If list is empty, reload from source
-        if (m_useLocalPath) {
-            fetchImagesFromLocal();
-        } else {
-            fetchImagesFromWebDAV();
-        }
-    } else {
-        // Select a new random image from existing list
-        selectRandomImage();
-    }
-}
-
 void NextcloudProvider::selectRandomImage()
 {
     if (m_imageUrls.isEmpty()) {
@@ -322,6 +309,33 @@ void NextcloudProvider::selectRandomImage()
         // For local paths, use file:// URL
         m_remoteUrl = QUrl::fromLocalFile(m_selectedImageUrl);
     }
+    
+    // Set optional metadata fields
+    QFileInfo fileInfo(m_selectedImageUrl);
+    
+    // infoUrl: URL to the Nextcloud folder or the image itself
+    if (m_useLocalPath) {
+        // For local paths, use the folder path
+        m_infoUrl = QUrl::fromLocalFile(fileInfo.absolutePath());
+    } else {
+        // For WebDAV, use the Nextcloud folder URL
+        // m_nextcloudUrl is normalized (no trailing slash)
+        // m_nextcloudPath is normalized (starts with /)
+        m_infoUrl = QUrl(m_nextcloudUrl + m_nextcloudPath);
+        qCDebug(WALLPAPERPOTD) << "Building InfoUrl - baseUrl:" << m_nextcloudUrl << "path:" << m_nextcloudPath << "InfoUrl:" << m_infoUrl.toString();
+    }
+    
+    // title: filename without path
+    m_title = fileInfo.fileName();
+    
+    // author: Nextcloud username (if available) or empty
+    m_author = m_username.isEmpty() ? QString() : m_username;
+    
+    // Debug: Log metadata fields to verify they are set before finished() is emitted
+    qCDebug(WALLPAPERPOTD) << "Metadata set - RemoteUrl:" << m_remoteUrl.toString()
+                           << "InfoUrl:" << m_infoUrl.toString()
+                           << "Title:" << m_title
+                           << "Author:" << m_author;
     
     // Invalidate cache for next time potd checks
     // This ensures that the NEXT time potd checks (at midnight or manual refresh),
@@ -365,6 +379,11 @@ void NextcloudProvider::selectRandomImage()
         if (m_image.isNull()) {
             Q_EMIT error(this);
         } else {
+            // Debug: Verify metadata is set before emitting finished()
+            qCDebug(WALLPAPERPOTD) << "Emitting finished() (local) - RemoteUrl:" << m_remoteUrl.toString()
+                                   << "InfoUrl:" << m_infoUrl.toString()
+                                   << "Title:" << m_title
+                                   << "Author:" << m_author;
             Q_EMIT finished(this, m_image);
         }
     }
@@ -390,6 +409,11 @@ void NextcloudProvider::imageRequestFinished(QNetworkReply *reply)
         qCWarning(WALLPAPERPOTD) << "Failed to load image from data";
         Q_EMIT error(this);
     } else {
+        // Debug: Verify metadata is still set before emitting finished()
+        qCDebug(WALLPAPERPOTD) << "Emitting finished() - RemoteUrl:" << m_remoteUrl.toString()
+                               << "InfoUrl:" << m_infoUrl.toString()
+                               << "Title:" << m_title
+                               << "Author:" << m_author;
         Q_EMIT finished(this, m_image);
     }
 }
