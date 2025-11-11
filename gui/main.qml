@@ -211,8 +211,8 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        // Try to auto-load config on startup
-        // readConfig() // Commented out - user can click Load button
+        // Auto-load config on startup if file exists
+        readConfig()
     }
 
     ColumnLayout {
@@ -338,11 +338,9 @@ ApplicationWindow {
             spacing: 10
 
             Button {
-                text: qsTr("Load")
+                text: qsTr("Reload")
                 onClicked: {
                     readConfig()
-                    statusLabel.text = qsTr("Configuration loaded")
-                    statusLabel.color = "green"
                 }
             }
 
