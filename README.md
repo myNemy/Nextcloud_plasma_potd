@@ -10,7 +10,7 @@ Provider for the KDE Plasma "Picture of the Day" plugin that allows using images
 - ✅ **Random Selection**: Randomly selects images from the folder
 - ✅ **Recursive Search**: Searches for images in all subfolders
 - ✅ **Image Limit**: Option to limit the number of images loaded
-- ⚠️ **Automatic Rotation**: Not available (see [docs/CAMBIA_IMMAGINE.md](docs/CAMBIA_IMMAGINE.md))
+- ⚠️ **Automatic Rotation**: Not available (see [docs/CHANGE_IMAGE.md](docs/CHANGE_IMAGE.md))
 
 ## Integration into kdeplasma-addons
 
@@ -132,7 +132,7 @@ LocalPath=/home/user/Nextcloud/Images
 MaxImages=0  # Maximum number of images to load (0 = unlimited)
 ```
 
-See [docs/CONFIGURAZIONE.md](docs/CONFIGURAZIONE.md) for complete details.
+See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for complete details.
 
 ## Compilation
 
@@ -149,13 +149,13 @@ sudo make install
 1. Go to Settings → Appearance → Background
 2. Select "Picture of the Day"
 3. In the "Provider" menu select "Nextcloud"
-4. Configure the provider (see [docs/CONFIGURAZIONE.md](docs/CONFIGURAZIONE.md))
+4. Configure the provider (see [docs/CONFIGURATION.md](docs/CONFIGURATION.md))
 5. Restart Plasma: `killall plasmashell && kstart plasmashell`
 
 ## Documentation
 
-- [docs/CONFIGURAZIONE.md](docs/CONFIGURAZIONE.md) - How to configure the provider
-- [docs/CAMBIA_IMMAGINE.md](docs/CAMBIA_IMMAGINE.md) - How to change the image
-- [docs/QUANDO_AGGIORNA_LISTA.md](docs/QUANDO_AGGIORNA_LISTA.md) - When the list is created/updated
+- [docs/CONFIGURATION.md](docs/CONFIGURATION.md) - How to configure the provider
+- [docs/CHANGE_IMAGE.md](docs/CHANGE_IMAGE.md) - How to change the image
+- [docs/WHEN_LIST_UPDATES.md](docs/WHEN_LIST_UPDATES.md) - When the list is created/updated
 - [docs/UNINSTALL.md](docs/UNINSTALL.md) - How to remove the provider
 - [docs/CHANGELOG.md](docs/CHANGELOG.md) - Changelog
