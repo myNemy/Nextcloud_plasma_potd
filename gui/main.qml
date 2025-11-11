@@ -283,14 +283,44 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
 
-                Button {
-                    text: qsTr("Save to File")
+                RowLayout {
                     Layout.fillWidth: true
-                    onClicked: {
-                        // Use helper script to save
-                        var process = Qt.createQmlObject('import QtQuick 2.15; QtObject {}', window)
-                        statusLabel.text = qsTr("Run this command to save: echo '...' > ~/.config/plasma_engine_potd/nextcloudprovider.conf")
-                        statusLabel.color = "orange"
+                    spacing: 10
+
+                    Button {
+                        text: qsTr("Copy to Clipboard")
+                        Layout.fillWidth: true
+                        onClicked: {
+                            configOutput.selectAll()
+                            configOutput.copy()
+                            statusLabel.text = qsTr("Configuration copied to clipboard! Paste it into the config file.")
+                            statusLabel.color = "green"
+                        }
+                    }
+
+                    Button {
+                        text: qsTr("Save to File")
+                        Layout.fillWidth: true
+                        onClicked: {
+                            // Get the script path (assuming we're in gui/ directory)
+                            var scriptPath = Qt.application.arguments.length > 0 
+                                ? Qt.application.arguments[0].replace(/\/[^\/]*$/, "") + "/save-config.sh"
+                                : "./save-config.sh"
+                            
+                            var configText = configOutput.text
+                            
+                            // Show command to run in terminal
+                            var command = "echo '" + configText.replace(/'/g, "'\\''").replace(/\n/g, "\\n") + "' | " + scriptPath
+                            
+                            statusLabel.text = qsTr("Run this command in terminal:\n") + command + "\n\nOr copy the text above and save manually to:\n~/.config/plasma_engine_potd/nextcloudprovider.conf"
+                            statusLabel.color = "orange"
+                            
+                            console.log("=== SAVE COMMAND ===")
+                            console.log(command)
+                            console.log("=== OR MANUALLY ===")
+                            console.log("Copy the config text and save to:")
+                            console.log("~/.config/plasma_engine_potd/nextcloudprovider.conf")
+                        }
                     }
                 }
             }
