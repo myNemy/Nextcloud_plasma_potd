@@ -103,9 +103,3 @@ install(FILES
     DESTINATION lib/qt6/plugins/potd
 )
 
-# Build GUI configuration tool
-option(BUILD_GUI "Build GUI configuration tool" ON)
-if(BUILD_GUI)
-    add_subdirectory(gui)
-endif()
-
