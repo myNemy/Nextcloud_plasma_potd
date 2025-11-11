@@ -15,11 +15,32 @@ ApplicationWindow {
     visible: true
     title: qsTr("Nextcloud Wallpaper Configuration")
 
-    property string configPath: Qt.StandardPaths.writableLocation(Qt.StandardPaths.ConfigLocation) + "/plasma_engine_potd/nextcloudprovider.conf"
+    property string configPath: {
+        var home = Qt.application.arguments.length > 0 ? Qt.application.arguments[0] : ""
+        // Try to get from environment or use default
+        var homeDir = ""
+        try {
+            // Use a simple approach - hardcode the path
+            homeDir = "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user")
+        } catch(e) {
+            homeDir = "/tmp"
+        }
+        return homeDir + "/.config/plasma_engine_potd/nextcloudprovider.conf"
+    }
+    
+    // Simpler approach - use fixed path
+    property string simpleConfigPath: "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
 
     function readConfig() {
+        // Use a simpler path
+        var path = Qt.application.arguments.length > 0 
+            ? Qt.application.arguments[0].replace(/\/[^\/]*$/, "") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
+            : "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
+        
+        // Try to read using XMLHttpRequest with enabled file access
         var xhr = new XMLHttpRequest()
-        xhr.open("GET", "file://" + configPath, false)
+        var filePath = "file://" + path
+        xhr.open("GET", filePath, false)
         xhr.send()
         
         if (xhr.status === 200 || xhr.status === 0) {
@@ -47,6 +68,8 @@ ApplicationWindow {
                     }
                 }
             }
+        } else {
+            console.log("Could not read config file. Status:", xhr.status)
         }
     }
 

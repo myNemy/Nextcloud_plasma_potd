@@ -1,6 +1,9 @@
 #!/bin/bash
 # Simple launcher for Nextcloud Wallpaper Configuration GUI
 
+# Enable XMLHttpRequest for local files
+export QML_XHR_ALLOW_FILE_READ=1
+
 # Try different QML runners
 if command -v qml6 &> /dev/null; then
     qml6 main.qml
