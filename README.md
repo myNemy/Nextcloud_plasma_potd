@@ -12,6 +12,46 @@ Provider for the KDE Plasma "Picture of the Day" plugin that allows using images
 - ✅ **Image Limit**: Option to limit the number of images loaded
 - ⚠️ **Automatic Rotation**: Not available (see [docs/CHANGE_IMAGE.md](docs/CHANGE_IMAGE.md))
 
+## Requirements
+
+### Minimum Requirements
+
+- **KDE Plasma**: 6.5.0 or higher
+- **KDE Frameworks**: 6.19.0 or higher (KF6)
+- **Qt**: 6.0.0 or higher (Qt6)
+- **CMake**: 3.16 or higher
+- **C++ Compiler**: C++17 support (GCC 7+, Clang 5+)
+- **kdeplasma-addons**: Development packages with potd provider support
+
+### Required KDE Frameworks Components
+
+- KF6::CoreAddons
+- KF6::ConfigCore
+- KF6::KIOCore
+
+### Required Qt Components
+
+- Qt6::Core
+- Qt6::Network
+- Qt6::Gui
+
+### Build Dependencies
+
+On Arch Linux:
+```bash
+sudo pacman -S cmake qt6-base qt6-network qt6-gui kf6-coreaddons kf6-config kf6-kio kdeplasma-addons
+```
+
+On Debian/Ubuntu:
+```bash
+sudo apt install cmake qt6-base-dev qt6-base-dev-tools libkf6coreaddons-dev libkf6config-dev libkf6kio-dev kdeplasma-addons-dev
+```
+
+On Fedora:
+```bash
+sudo dnf install cmake qt6-qtbase-devel kf6-kcoreaddons-devel kf6-kconfig-devel kf6-kio-devel kdeplasma-addons-devel
+```
+
 ## Integration into kdeplasma-addons
 
 To integrate this provider into the kdeplasma-addons repository:
