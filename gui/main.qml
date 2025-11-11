@@ -36,42 +36,54 @@ ApplicationWindow {
     function readConfig() {
         var homePath = ""
         
-        // Method 1: Try to get from Qt.application.arguments (passed by run.sh)
-        if (Qt.application.arguments.length > 1) {
-            homePath = Qt.application.arguments[1]
-            console.log("Got home from arguments:", homePath)
-        }
-        
-        // Method 2: Try to read from temporary file created by run.sh
-        if (homePath === "") {
-            try {
-                var xhr = new XMLHttpRequest()
-                xhr.open("GET", "file:///tmp/qml_home_path.txt", false)
-                xhr.send()
-                if ((xhr.status === 200 || xhr.status === 0) && xhr.responseText.length > 0) {
-                    homePath = xhr.responseText.trim()
+        // Method 1: Try to read from temporary file created by run.sh (most reliable)
+        try {
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET", "file:///tmp/qml_home_path.txt", false)
+            xhr.send()
+            if ((xhr.status === 200 || xhr.status === 0) && xhr.responseText.length > 0) {
+                homePath = xhr.responseText.trim()
+                // Validate it looks like a home path
+                if (homePath.startsWith("/home/") || homePath.startsWith("/root")) {
                     console.log("Got home from temp file:", homePath)
+                } else {
+                    homePath = ""
                 }
-            } catch(e) {
-                console.log("Could not read temp file:", e)
             }
+        } catch(e) {
+            console.log("Could not read temp file:", e)
         }
         
-        // Method 3: Try to read from helper script
+        // Method 2: Try to read from helper script
         if (homePath === "") {
             try {
                 var xhr = new XMLHttpRequest()
-                var scriptPath = Qt.application.arguments.length > 0 
-                    ? Qt.application.arguments[0].replace(/\/[^\/]*$/, "") + "/get-home.sh"
-                    : "./get-home.sh"
+                // Get script directory from current QML file location
+                var qmlFile = Qt.application.arguments[Qt.application.arguments.length - 1]
+                var scriptDir = qmlFile.substring(0, qmlFile.lastIndexOf("/"))
+                var scriptPath = scriptDir + "/get-home.sh"
+                
                 xhr.open("GET", "file://" + scriptPath, false)
                 xhr.send()
-                if (xhr.status === 200 || xhr.status === 0) {
-                    homePath = xhr.responseText.trim()
-                    console.log("Got home from script:", homePath)
+                if ((xhr.status === 200 || xhr.status === 0) && xhr.responseText.length > 0) {
+                    var result = xhr.responseText.trim()
+                    if (result.startsWith("/home/") || result.startsWith("/root")) {
+                        homePath = result
+                        console.log("Got home from script:", homePath)
+                    }
                 }
             } catch(e) {
                 console.log("Could not read get-home.sh:", e)
+            }
+        }
+        
+        // Method 3: Try to get from Qt.application.arguments (if passed correctly)
+        if (homePath === "" && Qt.application.arguments.length > 1) {
+            var arg = Qt.application.arguments[Qt.application.arguments.length - 1]
+            // Check if it's a valid home path (not the QML file name)
+            if (arg.startsWith("/home/") || arg.startsWith("/root")) {
+                homePath = arg
+                console.log("Got home from arguments:", homePath)
             }
         }
         
