@@ -32,44 +32,108 @@ ApplicationWindow {
     property string simpleConfigPath: "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
 
     function readConfig() {
-        // Use a simpler path
-        var path = Qt.application.arguments.length > 0 
-            ? Qt.application.arguments[0].replace(/\/[^\/]*$/, "") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
-            : "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
+        // Use HOME environment variable or default path
+        var homePath = ""
+        try {
+            // Try to get from environment
+            if (typeof process !== 'undefined' && process.env.HOME) {
+                homePath = process.env.HOME
+            } else {
+                // Fallback: try to get from user
+                homePath = "/home/" + (typeof process !== 'undefined' && process.env.USER ? process.env.USER : "user")
+            }
+        } catch(e) {
+            homePath = "/home/user"
+        }
+        
+        var configFile = homePath + "/.config/plasma_engine_potd/nextcloudprovider.conf"
+        
+        console.log("Trying to read config from:", configFile)
         
         // Try to read using XMLHttpRequest with enabled file access
         var xhr = new XMLHttpRequest()
-        var filePath = "file://" + path
+        var filePath = "file://" + configFile
         xhr.open("GET", filePath, false)
         xhr.send()
         
+        console.log("XHR status:", xhr.status, "Response length:", xhr.responseText.length)
+        
         if (xhr.status === 200 || xhr.status === 0) {
             var content = xhr.responseText
+            if (content.length === 0) {
+                statusLabel.text = qsTr("Config file is empty")
+                statusLabel.color = "orange"
+                return
+            }
+            
             var lines = content.split('\n')
             var currentSection = ""
+            var found = false
             
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i].trim()
+                
+                // Skip empty lines and comments
+                if (line.length === 0 || line.startsWith('#')) {
+                    continue
+                }
+                
                 if (line.startsWith('[') && line.endsWith(']')) {
                     currentSection = line.slice(1, -1)
-                } else if (currentSection === "Nextcloud" && line.includes('=') && !line.startsWith('#')) {
+                    console.log("Found section:", currentSection)
+                } else if (currentSection === "Nextcloud" && line.includes('=')) {
                     var parts = line.split('=')
-                    var key = parts[0].trim()
-                    var value = parts.slice(1).join('=').trim()
-                    
-                    switch(key) {
-                        case "Url": urlField.text = value; break
-                        case "Path": pathField.text = value; break
-                        case "Username": usernameField.text = value; break
-                        case "Password": passwordField.text = value; break
-                        case "UseLocalPath": localRadio.checked = (value === "true"); break
-                        case "LocalPath": localPathField.text = value; break
-                        case "MaxImages": maxImagesSpin.value = parseInt(value) || 0; break
+                    if (parts.length >= 2) {
+                        var key = parts[0].trim()
+                        var value = parts.slice(1).join('=').trim()
+                        
+                        console.log("Setting", key, "=", value)
+                        
+                        switch(key) {
+                            case "Url": 
+                                urlField.text = value
+                                found = true
+                                break
+                            case "Path": 
+                                pathField.text = value
+                                found = true
+                                break
+                            case "Username": 
+                                usernameField.text = value
+                                found = true
+                                break
+                            case "Password": 
+                                passwordField.text = value
+                                found = true
+                                break
+                            case "UseLocalPath": 
+                                localRadio.checked = (value === "true" || value === "True")
+                                found = true
+                                break
+                            case "LocalPath": 
+                                localPathField.text = value
+                                found = true
+                                break
+                            case "MaxImages": 
+                                maxImagesSpin.value = parseInt(value) || 0
+                                found = true
+                                break
+                        }
                     }
                 }
             }
+            
+            if (found) {
+                statusLabel.text = qsTr("Configuration loaded successfully!")
+                statusLabel.color = "green"
+            } else {
+                statusLabel.text = qsTr("Config file found but no Nextcloud section or values")
+                statusLabel.color = "orange"
+            }
         } else {
-            console.log("Could not read config file. Status:", xhr.status)
+            statusLabel.text = qsTr("Could not read config file. Status: ") + xhr.status + qsTr("\nFile: ") + configFile
+            statusLabel.color = "red"
+            console.log("Could not read config file. Status:", xhr.status, "File:", configFile)
         }
     }
 
