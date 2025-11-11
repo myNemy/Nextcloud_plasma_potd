@@ -34,11 +34,31 @@ ApplicationWindow {
     property string homeDirectory: ""
     
     function readConfig() {
-        // First, try to get home directory from helper script or environment
-        var homePath = homeDirectory
+        var homePath = ""
         
+        // Method 1: Try to get from Qt.application.arguments (passed by run.sh)
+        if (Qt.application.arguments.length > 1) {
+            homePath = Qt.application.arguments[1]
+            console.log("Got home from arguments:", homePath)
+        }
+        
+        // Method 2: Try to read from temporary file created by run.sh
         if (homePath === "") {
-            // Try to read from helper script
+            try {
+                var xhr = new XMLHttpRequest()
+                xhr.open("GET", "file:///tmp/qml_home_path.txt", false)
+                xhr.send()
+                if ((xhr.status === 200 || xhr.status === 0) && xhr.responseText.length > 0) {
+                    homePath = xhr.responseText.trim()
+                    console.log("Got home from temp file:", homePath)
+                }
+            } catch(e) {
+                console.log("Could not read temp file:", e)
+            }
+        }
+        
+        // Method 3: Try to read from helper script
+        if (homePath === "") {
             try {
                 var xhr = new XMLHttpRequest()
                 var scriptPath = Qt.application.arguments.length > 0 
@@ -48,31 +68,20 @@ ApplicationWindow {
                 xhr.send()
                 if (xhr.status === 200 || xhr.status === 0) {
                     homePath = xhr.responseText.trim()
+                    console.log("Got home from script:", homePath)
                 }
             } catch(e) {
                 console.log("Could not read get-home.sh:", e)
             }
         }
         
-        // Try environment variables
-        if (homePath === "" && typeof process !== 'undefined') {
-            if (process.env.QML_HOME_DIR) {
-                homePath = process.env.QML_HOME_DIR
-            } else if (process.env.HOME) {
-                homePath = process.env.HOME
-            } else if (process.env.USER) {
-                homePath = "/home/" + process.env.USER
-            }
-        }
-        
-        // Final fallback - try to detect from current working directory
+        // Method 4: Fallback - try common paths
         if (homePath === "") {
-            // Try common home paths
             var possibleUsers = ["nemeyes", "user"]
             for (var i = 0; i < possibleUsers.length; i++) {
                 var testPath = "/home/" + possibleUsers[i]
-                // We can't test if directory exists in QML easily, so just use first
                 homePath = testPath
+                console.log("Using fallback path:", homePath)
                 break
             }
         }

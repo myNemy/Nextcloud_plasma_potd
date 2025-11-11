@@ -7,15 +7,21 @@ export QML_XHR_ALLOW_FILE_READ=1
 # Pass HOME directory as environment variable
 export QML_HOME_DIR="$HOME"
 
+# Create a temporary file with home path for QML to read
+echo "$HOME" > /tmp/qml_home_path.txt
+
 # Try different QML runners
 if command -v qml6 &> /dev/null; then
-    qml6 main.qml
+    qml6 main.qml "$HOME"
 elif command -v qmlscene &> /dev/null; then
-    qmlscene main.qml
+    qmlscene main.qml "$HOME"
 elif command -v qml &> /dev/null; then
-    qml main.qml
+    qml main.qml "$HOME"
 else
     echo "Error: No QML runner found. Please install qt6-declarative or qt5-declarative"
     exit 1
 fi
+
+# Cleanup
+rm -f /tmp/qml_home_path.txt
 
