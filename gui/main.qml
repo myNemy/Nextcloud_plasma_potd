@@ -87,15 +87,13 @@ ApplicationWindow {
             }
         }
         
-        // Method 4: Fallback - try common paths
+        // Method 4: Fallback - try common paths (only if all else fails)
         if (homePath === "") {
-            var possibleUsers = ["nemeyes", "user"]
-            for (var i = 0; i < possibleUsers.length; i++) {
-                var testPath = "/home/" + possibleUsers[i]
-                homePath = testPath
-                console.log("Using fallback path:", homePath)
-                break
-            }
+            // Generic fallback - user will need to manually set path if this doesn't work
+            var testPath = "/home/user"
+            homePath = testPath
+            console.log("Using generic fallback path:", homePath)
+            console.log("WARNING: Could not detect home directory. Config file may not be found.")
         }
         
         if (homePath === "") {

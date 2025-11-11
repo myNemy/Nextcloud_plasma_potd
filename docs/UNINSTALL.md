@@ -47,6 +47,7 @@ ls -la /potd/ 2>/dev/null || echo "OK: /potd/ does not exist"
 
 ```bash
 # If you want to clean up compilation files too
-cd /home/nemeyes/nextcloud-wallpaper
+# Navigate to your project directory
+cd /path/to/nextcloud-wallpaper
 rm -rf build/
 ```
