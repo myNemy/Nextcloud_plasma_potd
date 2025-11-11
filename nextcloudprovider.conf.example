@@ -25,3 +25,9 @@ LocalPath=
 # E.g. 100 = load maximum 100 images
 # Note: the limit is applied during scanning
 MaxImages=0
+
+# RotationInterval - DEPRECATED (not used)
+# potd engine updates wallpapers once per day at midnight automatically
+# This option is kept for backward compatibility but has no effect
+# To change images more frequently, restart Plasma or change provider
+#RotationInterval=0

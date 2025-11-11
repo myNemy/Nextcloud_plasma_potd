@@ -403,137 +403,31 @@ ApplicationWindow {
                     }
 
                     Button {
-                        id: saveButton
                         text: qsTr("Save to File")
                         Layout.fillWidth: true
-                        enabled: !saveTimer.running
                         onClicked: {
                             var configText = configOutput.text
                             
-                            if (configText.trim() === "") {
-                                statusLabel.text = qsTr("Error: Configuration is empty")
-                                statusLabel.color = "red"
-                                return
-                            }
-                            
                             // Get script path
-                            var qmlFile = Qt.application.arguments.length > 0 
-                                ? Qt.application.arguments[Qt.application.arguments.length - 1]
-                                : "main.qml"
-                            var scriptDir = qmlFile.substring(0, qmlFile.lastIndexOf("/"))
-                            var scriptPath = scriptDir + "/save-with-feedback.sh"
+                            var scriptPath = Qt.application.arguments.length > 0 
+                                ? Qt.application.arguments[0].replace(/\/[^\/]*$/, "") + "/save-config.sh"
+                                : "./save-config.sh"
                             
-                            // Show saving status
-                            statusLabel.text = qsTr("Saving configuration...")
-                            statusLabel.color = "blue"
-                            saveButton.text = qsTr("Saving...")
-                            saveButton.enabled = false
-                            
-                            // Write config to temp file and execute save script in background
-                            var tempConfigFile = "/tmp/nextcloud_config_" + Date.now() + ".conf"
-                            
-                            // Write config to temp file (we'll read it from the script)
-                            // Since QML can't write files directly, we'll use a workaround:
-                            // Write the command to a file that will be executed
-                            var commandFile = "/tmp/nextcloud_save_cmd_" + Date.now() + ".sh"
+                            // Create command
                             var escaped = configText.replace(/'/g, "'\\''").replace(/\n/g, "\\n")
                             var command = "echo '" + escaped + "' | bash " + scriptPath
                             
-                            // Execute command in background (using nohup or &)
-                            // Since we can't execute directly, we'll check result file
-                            saveTimer.scriptPath = scriptPath
-                            saveTimer.configText = configText
-                            saveTimer.start()
+                            // Show command and instructions
+                            statusLabel.text = qsTr("To save, run this command in terminal:\n\n") + 
+                                             command + 
+                                             qsTr("\n\nOr copy the configuration text above and save manually to:\n~/.config/plasma_engine_potd/nextcloudprovider.conf")
+                            statusLabel.color = "blue"
                             
-                            // Also log command for manual execution if needed
-                            console.log("Executing save command in background...")
-                            console.log("Command:", command)
-                        }
-                    }
-                    
-                    // Timer to check save result
-                    Timer {
-                        id: saveTimer
-                        property string scriptPath: ""
-                        property string configText: ""
-                        interval: 100
-                        repeat: true
-                        running: false
-                        property int attempts: 0
-                        property bool commandExecuted: false
-                        
-                        onTriggered: {
-                            attempts++
-                            
-                            // Execute command on first attempt (using trigger file approach)
-                            if (!commandExecuted && attempts === 1) {
-                                commandExecuted = true
-                                
-                                // Write config and script path to trigger file
-                                // The run.sh script monitors this file and executes when it appears
-                                // Format: all config lines + script path on last line
-                                var triggerContent = configText + "\n" + scriptPath
-                                
-                                // Since QML can't write files directly, we'll use a workaround:
-                                // Write trigger content to a file using a helper approach
-                                // For now, we'll just log and check result (user can execute manually)
-                                console.log("=== SAVE COMMAND ===")
-                                var escaped = configText.replace(/'/g, "'\\''").replace(/\n/g, "\\n")
-                                var command = "echo '" + escaped + "' | bash " + scriptPath
-                                console.log(command)
-                                console.log("=== END COMMAND ===")
-                                console.log("Note: Execute this command manually or wait for automatic execution via run.sh monitor")
-                            }
-                            
-                            // Check if result file exists and was updated recently
-                            try {
-                                var xhr = new XMLHttpRequest()
-                                xhr.open("GET", "file:///tmp/nextcloud_save_result.txt", false)
-                                xhr.send()
-                                
-                                if (xhr.status === 200 || xhr.status === 0) {
-                                    var result = xhr.responseText.trim()
-                                    
-                                    if (result.length > 0 && (result.startsWith("SUCCESS:") || result.startsWith("ERROR"))) {
-                                        // Result found
-                                        saveButton.text = qsTr("Save to File")
-                                        saveButton.enabled = true
-                                        stop()
-                                        attempts = 0
-                                        commandExecuted = false
-                                        
-                                        if (result.startsWith("SUCCESS:")) {
-                                            var savedPath = result.substring(8) // Remove "SUCCESS:" prefix
-                                            statusLabel.text = qsTr("✓ Configuration saved successfully!\nFile: ") + savedPath
-                                            statusLabel.color = "green"
-                                            
-                                            // Reload config to show it was saved
-                                            Qt.callLater(function() {
-                                                readConfig()
-                                            })
-                                        } else {
-                                            var errorMsg = result.startsWith("ERROR:") ? result.substring(6) : result
-                                            statusLabel.text = qsTr("✗ Error: ") + errorMsg
-                                            statusLabel.color = "red"
-                                        }
-                                        
-                                        return
-                                    }
-                                }
-                            } catch(e) {
-                                // Result file not ready yet or doesn't exist
-                            }
-                            
-                            // If we've tried too many times, give up
-                            if (attempts > 50) { // 5 seconds max
-                                saveButton.text = qsTr("Save to File")
-                                saveButton.enabled = true
-                                stop()
-                                attempts = 0
-                                commandExecuted = false
-                                statusLabel.text = qsTr("⚠ Could not verify save automatically.\nPlease execute the command shown in console or save manually.")
-                                statusLabel.color = "orange"
-                            }
+                            // Also log to console for easy copy
+                            console.log("=== COPY THIS COMMAND ===")
+                            console.log(command)
+                            console.log("=== OR COPY CONFIG TEXT ===")
+                            console.log(configText)
                         }
                     }
                 }
