@@ -31,20 +31,58 @@ ApplicationWindow {
     // Simpler approach - use fixed path
     property string simpleConfigPath: "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
 
+    property string homeDirectory: ""
+    
     function readConfig() {
-        // Use HOME environment variable or default path
-        var homePath = ""
-        try {
-            // Try to get from environment
-            if (typeof process !== 'undefined' && process.env.HOME) {
-                homePath = process.env.HOME
-            } else {
-                // Fallback: try to get from user
-                homePath = "/home/" + (typeof process !== 'undefined' && process.env.USER ? process.env.USER : "user")
+        // First, try to get home directory from helper script or environment
+        var homePath = homeDirectory
+        
+        if (homePath === "") {
+            // Try to read from helper script
+            try {
+                var xhr = new XMLHttpRequest()
+                var scriptPath = Qt.application.arguments.length > 0 
+                    ? Qt.application.arguments[0].replace(/\/[^\/]*$/, "") + "/get-home.sh"
+                    : "./get-home.sh"
+                xhr.open("GET", "file://" + scriptPath, false)
+                xhr.send()
+                if (xhr.status === 200 || xhr.status === 0) {
+                    homePath = xhr.responseText.trim()
+                }
+            } catch(e) {
+                console.log("Could not read get-home.sh:", e)
             }
-        } catch(e) {
-            homePath = "/home/user"
         }
+        
+        // Try environment variables
+        if (homePath === "" && typeof process !== 'undefined') {
+            if (process.env.QML_HOME_DIR) {
+                homePath = process.env.QML_HOME_DIR
+            } else if (process.env.HOME) {
+                homePath = process.env.HOME
+            } else if (process.env.USER) {
+                homePath = "/home/" + process.env.USER
+            }
+        }
+        
+        // Final fallback - try to detect from current working directory
+        if (homePath === "") {
+            // Try common home paths
+            var possibleUsers = ["nemeyes", "user"]
+            for (var i = 0; i < possibleUsers.length; i++) {
+                var testPath = "/home/" + possibleUsers[i]
+                // We can't test if directory exists in QML easily, so just use first
+                homePath = testPath
+                break
+            }
+        }
+        
+        if (homePath === "") {
+            homePath = "/tmp"
+        }
+        
+        // Store for future use
+        homeDirectory = homePath
         
         var configFile = homePath + "/.config/plasma_engine_potd/nextcloudprovider.conf"
         
@@ -164,7 +202,8 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        readConfig()
+        // Try to auto-load config on startup
+        // readConfig() // Commented out - user can click Load button
     }
 
     ColumnLayout {

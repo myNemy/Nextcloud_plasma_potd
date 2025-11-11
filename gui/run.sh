@@ -4,6 +4,9 @@
 # Enable XMLHttpRequest for local files
 export QML_XHR_ALLOW_FILE_READ=1
 
+# Pass HOME directory as environment variable
+export QML_HOME_DIR="$HOME"
+
 # Try different QML runners
 if command -v qml6 &> /dev/null; then
     qml6 main.qml
