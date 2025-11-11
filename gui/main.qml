@@ -15,22 +15,6 @@ ApplicationWindow {
     visible: true
     title: qsTr("Nextcloud Wallpaper Configuration")
 
-    property string configPath: {
-        var home = Qt.application.arguments.length > 0 ? Qt.application.arguments[0] : ""
-        // Try to get from environment or use default
-        var homeDir = ""
-        try {
-            // Use a simple approach - hardcode the path
-            homeDir = "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user")
-        } catch(e) {
-            homeDir = "/tmp"
-        }
-        return homeDir + "/.config/plasma_engine_potd/nextcloudprovider.conf"
-    }
-    
-    // Simpler approach - use fixed path
-    property string simpleConfigPath: "/home/" + (typeof process !== 'undefined' ? process.env.USER : "user") + "/.config/plasma_engine_potd/nextcloudprovider.conf"
-
     property string homeDirectory: ""
     
     function readConfig() {
@@ -372,7 +356,7 @@ ApplicationWindow {
                         console.log("=== CONFIGURATION ===")
                         console.log(config)
                         console.log("=== END CONFIG ===")
-                        console.log("Save to: " + configPath)
+                        console.log("Save to: " + homeDirectory + "/.config/plasma_engine_potd/nextcloudprovider.conf")
                     }
                 }
             }
