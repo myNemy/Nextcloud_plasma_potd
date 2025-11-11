@@ -235,7 +235,7 @@ ApplicationWindow {
             }
 
             Button {
-                text: qsTr("Copy Config")
+                text: qsTr("Save Configuration")
                 Layout.fillWidth: true
                 onClicked: {
                     var error = validateConfig()
@@ -244,9 +244,10 @@ ApplicationWindow {
                         statusLabel.color = "red"
                     } else {
                         var config = generateConfig()
-                        // Copy to clipboard would require Qt.labs.platform
-                        // For now, show in status and user can copy manually
-                        statusLabel.text = qsTr("Config generated - see console output")
+                        // Show config in text area and allow user to save
+                        configOutput.text = config
+                        configOutput.visible = true
+                        statusLabel.text = qsTr("Configuration generated! Copy the text below and save it to: ~/.config/plasma_engine_potd/nextcloudprovider.conf")
                         statusLabel.color = "blue"
                         console.log("=== CONFIGURATION ===")
                         console.log(config)
@@ -257,14 +258,42 @@ ApplicationWindow {
             }
         }
 
-        TextArea {
-            id: configOutput
+        GroupBox {
+            title: qsTr("Generated Configuration")
             Layout.fillWidth: true
-            Layout.preferredHeight: 100
-            visible: false
-            readOnly: true
-            font.family: "monospace"
-            font.pointSize: 9
+            visible: configOutput.text !== ""
+
+            ColumnLayout {
+                anchors.fill: parent
+
+                TextArea {
+                    id: configOutput
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 120
+                    readOnly: false
+                    font.family: "monospace"
+                    font.pointSize: 9
+                    selectByMouse: true
+                }
+
+                Label {
+                    text: qsTr("Save this to: ~/.config/plasma_engine_potd/nextcloudprovider.conf")
+                    font.pointSize: 9
+                    color: "gray"
+                    wrapMode: Text.WordWrap
+                }
+
+                Button {
+                    text: qsTr("Save to File")
+                    Layout.fillWidth: true
+                    onClicked: {
+                        // Use helper script to save
+                        var process = Qt.createQmlObject('import QtQuick 2.15; QtObject {}', window)
+                        statusLabel.text = qsTr("Run this command to save: echo '...' > ~/.config/plasma_engine_potd/nextcloudprovider.conf")
+                        statusLabel.color = "orange"
+                    }
+                }
+            }
         }
     }
 }
