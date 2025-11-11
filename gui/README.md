@@ -47,17 +47,18 @@ sudo apt install qml6-module-qtquick-controls2
 
 ## Features
 
-- **Load Configuration**: Click "Load" to read your existing configuration file
+- **Auto-load Configuration**: Automatically loads existing configuration file on startup (if present)
 - **Edit Settings**: Modify URL, path, username, password, etc.
 - **Switch Modes**: Choose between WebDAV (direct connection) or local synchronized folder
 - **Generate Config**: Click "Save Configuration" to generate the config file content
 - **Copy & Save**: Copy the generated configuration and save it manually to `~/.config/plasma_engine_potd/nextcloudprovider.conf`
+- **Reload**: Click "Reload" button to reload configuration from file
 
 ## How to Use
 
 1. **Launch the GUI**: `./run.sh`
-2. **Load existing config** (if you have one): Click "Load" button
-3. **Fill in your settings**:
+   - The configuration is automatically loaded if the file exists
+2. **Fill in your settings** (or edit existing ones):
    - Choose connection mode (WebDAV or Local)
    - Enter Nextcloud URL, WebDAV path, username, password (for WebDAV mode)
    - Or enter local path (for Local mode)
