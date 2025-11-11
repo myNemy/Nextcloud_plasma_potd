@@ -2,21 +2,7 @@
 
 The Nextcloud provider has appeared in the list! Now you need to configure it.
 
-## Method 1: Interactive Script (Recommended)
-
-```bash
-# Run the configuration script
-bash /tmp/setup_nextcloud_config.sh
-```
-
-The script will ask you:
-- Nextcloud URL (e.g. `https://nextcloud.example.com`)
-- WebDAV Path (e.g. `/remote.php/dav/files/USERNAME/Images`)
-- Username
-- Password or App Password
-- Whether you want to use a locally synchronized path
-
-## Method 2: Manual Configuration
+## Manual Configuration
 
 Create the file `~/.config/plasma_engine_potd/nextcloudprovider.conf`:
 
