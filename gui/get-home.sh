@@ -1,4 +1,4 @@
 #!/bin/bash
-# Helper to get home directory and pass to QML
+# Helper to get home directory for QML
 echo "$HOME"
 
