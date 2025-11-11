@@ -7,7 +7,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Dialogs 1.3
 
 ApplicationWindow {
     id: window
@@ -19,14 +18,12 @@ ApplicationWindow {
     property string configPath: Qt.StandardPaths.writableLocation(Qt.StandardPaths.ConfigLocation) + "/plasma_engine_potd/nextcloudprovider.conf"
 
     function readConfig() {
-        var file = Qt.createQmlObject('import QtQuick 2.15; QtObject {}', window)
         var xhr = new XMLHttpRequest()
         xhr.open("GET", "file://" + configPath, false)
         xhr.send()
         
-        if (xhr.status === 200) {
+        if (xhr.status === 200 || xhr.status === 0) {
             var content = xhr.responseText
-            // Simple INI parser
             var lines = content.split('\n')
             var currentSection = ""
             
@@ -34,7 +31,7 @@ ApplicationWindow {
                 var line = lines[i].trim()
                 if (line.startsWith('[') && line.endsWith(']')) {
                     currentSection = line.slice(1, -1)
-                } else if (currentSection === "Nextcloud" && line.includes('=')) {
+                } else if (currentSection === "Nextcloud" && line.includes('=') && !line.startsWith('#')) {
                     var parts = line.split('=')
                     var key = parts[0].trim()
                     var value = parts.slice(1).join('=').trim()
@@ -53,7 +50,7 @@ ApplicationWindow {
         }
     }
 
-    function writeConfig() {
+    function generateConfig() {
         var content = "[Nextcloud]\n"
         content += "Url=" + urlField.text + "\n"
         content += "Path=" + pathField.text + "\n"
@@ -62,13 +59,7 @@ ApplicationWindow {
         content += "UseLocalPath=" + (localRadio.checked ? "true" : "false") + "\n"
         content += "LocalPath=" + localPathField.text + "\n"
         content += "MaxImages=" + maxImagesSpin.value + "\n"
-        
-        var file = Qt.createQmlObject('import QtQuick 2.15; QtObject {}', window)
-        var xhr = new XMLHttpRequest()
-        xhr.open("PUT", "file://" + configPath, false)
-        xhr.send(content)
-        
-        return xhr.status === 200 || xhr.status === 0
+        return content
     }
 
     function validateConfig() {
@@ -87,14 +78,6 @@ ApplicationWindow {
 
     Component.onCompleted: {
         readConfig()
-    }
-
-    FileDialog {
-        id: folderDialog
-        selectFolder: true
-        onAccepted: {
-            localPathField.text = folderDialog.fileUrl.toString().replace("file://", "")
-        }
     }
 
     ColumnLayout {
@@ -170,20 +153,11 @@ ApplicationWindow {
                             visible: webdavRadio.checked
                         }
 
-                        RowLayout {
-                            visible: localRadio.checked
+                        TextField {
+                            id: localPathField
+                            placeholderText: qsTr("Local Path (e.g. /home/user/Nextcloud/Images)")
                             Layout.fillWidth: true
-
-                            TextField {
-                                id: localPathField
-                                placeholderText: qsTr("Local Path")
-                                Layout.fillWidth: true
-                            }
-
-                            Button {
-                                text: qsTr("Browse...")
-                                onClicked: folderDialog.open()
-                            }
+                            visible: localRadio.checked
                         }
                     }
                 }
@@ -238,7 +212,7 @@ ApplicationWindow {
             }
 
             Button {
-                text: qsTr("Save")
+                text: qsTr("Copy Config")
                 Layout.fillWidth: true
                 onClicked: {
                     var error = validateConfig()
@@ -246,17 +220,28 @@ ApplicationWindow {
                         statusLabel.text = error
                         statusLabel.color = "red"
                     } else {
-                        if (writeConfig()) {
-                            statusLabel.text = qsTr("Configuration saved!")
-                            statusLabel.color = "green"
-                        } else {
-                            statusLabel.text = qsTr("Failed to save")
-                            statusLabel.color = "red"
-                        }
+                        var config = generateConfig()
+                        // Copy to clipboard would require Qt.labs.platform
+                        // For now, show in status and user can copy manually
+                        statusLabel.text = qsTr("Config generated - see console output")
+                        statusLabel.color = "blue"
+                        console.log("=== CONFIGURATION ===")
+                        console.log(config)
+                        console.log("=== END CONFIG ===")
+                        console.log("Save to: " + configPath)
                     }
                 }
             }
         }
+
+        TextArea {
+            id: configOutput
+            Layout.fillWidth: true
+            Layout.preferredHeight: 100
+            visible: false
+            readOnly: true
+            font.family: "monospace"
+            font.pointSize: 9
+        }
     }
 }
-
