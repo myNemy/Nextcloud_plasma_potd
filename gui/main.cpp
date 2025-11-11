@@ -13,7 +13,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QProcess>
-#include <QStandardPaths>
+#include <QFileDialog>
 
 #include <KConfigGroup>
 #include <KSharedConfig>
@@ -170,15 +170,18 @@ public:
         return QString();
     }
 
-    Q_INVOKABLE QString getInstallInstructions() {
-        return QStringLiteral("To install the provider:\n\n"
-                             "1. Compile the provider:\n"
-                             "   cd build\n"
-                             "   cmake ..\n"
-                             "   make\n"
-                             "   sudo make install\n\n"
-                             "2. Restart Plasma:\n"
-                             "   killall plasmashell && kstart plasmashell");
+    Q_INVOKABLE QString browseFolder() {
+        QFileDialog dialog;
+        dialog.setFileMode(QFileDialog::Directory);
+        dialog.setOption(QFileDialog::ShowDirsOnly, true);
+        
+        if (dialog.exec()) {
+            QStringList selected = dialog.selectedFiles();
+            if (!selected.isEmpty()) {
+                return selected.first();
+            }
+        }
+        return QString();
     }
 
 signals:

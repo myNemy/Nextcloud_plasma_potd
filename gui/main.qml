@@ -107,23 +107,27 @@ ApplicationWindow {
                         }
 
                         // Local path field
-                        TextField {
-                            id: localPathField
-                            placeholderText: qsTr("Local Path (e.g. /home/user/Nextcloud/Images)")
-                            text: configManager.localPath
-                            onTextChanged: configManager.localPath = text
+                        RowLayout {
                             Layout.fillWidth: true
                             visible: localRadio.checked
-                        }
 
-                        TextField {
-                            id: browseHint
-                            text: qsTr("Enter local path manually or use file manager")
-                            readOnly: true
-                            visible: localRadio.checked
-                            Layout.fillWidth: true
-                            font.italic: true
-                            color: "gray"
+                            TextField {
+                                id: localPathField
+                                placeholderText: qsTr("Local Path (e.g. /home/user/Nextcloud/Images)")
+                                text: configManager.localPath
+                                onTextChanged: configManager.localPath = text
+                                Layout.fillWidth: true
+                            }
+
+                            Button {
+                                text: qsTr("Browse...")
+                                onClicked: {
+                                    const path = configManager.browseFolder()
+                                    if (path) {
+                                        configManager.localPath = path
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -199,15 +203,6 @@ ApplicationWindow {
                             statusLabel.color = "red"
                         }
                     }
-                }
-            }
-
-            Button {
-                text: qsTr("Show Install Instructions")
-                onClicked: {
-                    const instructions = configManager.getInstallInstructions()
-                    statusLabel.text = instructions
-                    statusLabel.color = "blue"
                 }
             }
         }

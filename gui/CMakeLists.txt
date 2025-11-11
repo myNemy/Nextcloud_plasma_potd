@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Standalone GUI - no dependency on provider compilation
 find_package(Qt6 REQUIRED COMPONENTS Core Quick Qml)
 
-find_package(ECM REQUIRED NO_MODULE)
 find_package(KF6 REQUIRED COMPONENTS ConfigCore)
 
 qt6_add_executable(nextcloud-wallpaper-config
