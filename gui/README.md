@@ -1,39 +1,56 @@
 # Nextcloud Wallpaper Configuration GUI
 
-Standalone Qt6/QML application for configuring the Nextcloud Wallpaper provider.
+Simple standalone GUI for configuring the Nextcloud wallpaper provider.
 
-## Features
+## Usage
 
-- ✅ Configure Nextcloud connection (WebDAV or local path)
-- ✅ Save/load configuration from `~/.config/plasma_engine_potd/nextcloudprovider.conf`
-- ✅ Validate configuration before saving
-- ✅ Browse for local folder path
-- ✅ No dependency on provider compilation
-
-## Build
+### Method 1: Direct QML execution (no compilation needed)
 
 ```bash
 cd gui
-mkdir build && cd build
-cmake ..
-make
+./run.sh
 ```
 
-## Run
-
+Or directly:
 ```bash
-./nextcloud-wallpaper-config
+qml6 gui/main.qml
 ```
 
-## Install
+### Method 2: Create desktop entry
 
-```bash
-sudo make install
-# Then run: nextcloud-wallpaper-config
+You can create a `.desktop` file to launch it from your application menu:
+
+```ini
+[Desktop Entry]
+Name=Nextcloud Wallpaper Config
+Comment=Configure Nextcloud Wallpaper Provider
+Exec=qml6 /path/to/nextcloud-wallpaper/gui/main.qml
+Icon=folder-remote
+Type=Application
+Categories=Settings;
 ```
 
 ## Requirements
 
-- Qt6 (Core, Quick, Qml)
-- KF6::ConfigCore
+- Qt6 QML runtime (`qml6` or `qmlscene`)
+- Qt6 Quick Controls 2
+
+On Arch Linux:
+```bash
+sudo pacman -S qt6-declarative
+```
+
+On Debian/Ubuntu:
+```bash
+sudo apt install qml6-module-qtquick-controls2
+```
+
+## Features
+
+- Load existing configuration
+- Save configuration to `~/.config/plasma_engine_potd/nextcloudprovider.conf`
+- Switch between WebDAV and local path modes
+- Browse for local folder
+- Set maximum images limit
+- Input validation
 
