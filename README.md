@@ -85,3 +85,17 @@ sudo make install
 3. In the "Provider" menu select "Nextcloud"
 4. Configure the provider (create `~/.config/plasma_engine_potd/nextcloudprovider.conf` as shown above)
 5. Restart Plasma: `killall plasmashell && kstart plasmashell`
+
+## License
+
+This project is licensed under the **GPL-2.0-or-later** license, the same license used by the KDE Plasma potd provider system.
+
+See the [LICENSE](LICENSE) file for the full text of the GNU General Public License version 2.
+
+## Development
+
+This project was developed with the assistance of AI coding tools.
+
+## Trademark Notice
+
+"Nextcloud" is a registered trademark. This project is not affiliated with, sponsored by, or endorsed by Nextcloud GmbH.
