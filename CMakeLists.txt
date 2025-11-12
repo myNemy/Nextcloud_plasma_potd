@@ -13,8 +13,8 @@ find_package(KF6CoreAddons REQUIRED)
 find_package(KF6Config REQUIRED)
 find_package(KF6KIO REQUIRED)
 
-# Try to find PlasmaPotdProvider
-# If not found, we'll need to build it or use installed version
+# Try to find PlasmaPotdProvider library (optional)
+# Search in more paths including Qt6 plugin directories
 find_library(PLASMA_POTD_PROVIDER_CORE
     NAMES plasmapotdprovidercore
     PATHS
@@ -22,29 +22,37 @@ find_library(PLASMA_POTD_PROVIDER_CORE
         /usr/lib64
         /usr/local/lib
         /usr/local/lib64
+        /usr/lib/x86_64-linux-gnu
+        ${Qt6_DIR}/../../../lib
+        ${Qt6_DIR}/../../../lib/x86_64-linux-gnu
     PATH_SUFFIXES
         x86_64-linux-gnu
         lib64
         lib
+        qt6/plugins
+    NO_DEFAULT_PATH
 )
 
+# Also try default paths
 if(NOT PLASMA_POTD_PROVIDER_CORE)
-    message(WARNING "plasmapotdprovidercore not found. You may need to install kdeplasma-addons or build it separately.")
-    message(STATUS "Trying to find via pkg-config...")
-    
-    # Try pkg-config
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(KF6_POTD QUIET KF6PlasmaPotdProvider)
-    
-    if(KF6_POTD_FOUND)
-        set(PLASMA_POTD_PROVIDER_CORE ${KF6_POTD_LIBRARIES})
-        message(STATUS "Found via pkg-config: ${PLASMA_POTD_PROVIDER_CORE}")
-    else()
-        message(FATAL_ERROR "plasmapotdprovidercore library not found. Please install kdeplasma-addons development packages.")
-    endif()
-endif()
+    find_library(PLASMA_POTD_PROVIDER_CORE
+        NAMES plasmapotdprovidercore
+    )
+endif
 
-# Find potdprovider.h
+# Try pkg-config as fallback
+if(NOT PLASMA_POTD_PROVIDER_CORE)
+    find_package(PkgConfig)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(KF6_POTD QUIET KF6PlasmaPotdProvider)
+        if(KF6_POTD_FOUND)
+            set(PLASMA_POTD_PROVIDER_CORE ${KF6_POTD_LIBRARIES})
+            message(STATUS "Found plasmapotdprovidercore via pkg-config: ${PLASMA_POTD_PROVIDER_CORE}")
+        endif()
+    endif()
+endif
+
+# Find potdprovider.h - try system first, then fallback to included file
 find_path(POTD_PROVIDER_INCLUDE_DIR
     NAMES potdprovider.h
     PATHS
@@ -54,14 +62,24 @@ find_path(POTD_PROVIDER_INCLUDE_DIR
     PATH_SUFFIXES
         plasma/potdprovider
         KF6/plasma/potdprovider
+        KF6/Plasma/potdprovider
 )
 
+# If not found in system, use the included file
 if(NOT POTD_PROVIDER_INCLUDE_DIR)
-    message(FATAL_ERROR "potdprovider.h not found. Please install kdeplasma-addons development packages.")
+    message(WARNING "potdprovider.h not found in system, using included file from repository")
+    set(POTD_PROVIDER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/plugins/providers)
 endif()
 
-message(STATUS "Found potdprovider.h in: ${POTD_PROVIDER_INCLUDE_DIR}")
-message(STATUS "Found plasmapotdprovidercore: ${PLASMA_POTD_PROVIDER_CORE}")
+# Warn if library not found but continue anyway
+if(NOT PLASMA_POTD_PROVIDER_CORE)
+    message(WARNING "plasmapotdprovidercore library not found. Attempting to build without explicit linking.")
+    message(WARNING "The library may be linked dynamically by Plasma at runtime.")
+else()
+    message(STATUS "Found plasmapotdprovidercore: ${PLASMA_POTD_PROVIDER_CORE}")
+endif()
+
+message(STATUS "Using potdprovider.h from: ${POTD_PROVIDER_INCLUDE_DIR}")
 
 # Build the provider as a shared library (plugin)
 add_library(plasma_potd_nextcloudprovider SHARED
@@ -80,7 +98,6 @@ target_include_directories(plasma_potd_nextcloudprovider PRIVATE
 )
 
 target_link_libraries(plasma_potd_nextcloudprovider PRIVATE
-    ${PLASMA_POTD_PROVIDER_CORE}
     Qt6::Core
     Qt6::Network
     Qt6::Gui
@@ -88,6 +105,11 @@ target_link_libraries(plasma_potd_nextcloudprovider PRIVATE
     KF6::ConfigCore
     KF6::KIOCore
 )
+
+# Link plasmapotdprovidercore only if found
+if(PLASMA_POTD_PROVIDER_CORE)
+    target_link_libraries(plasma_potd_nextcloudprovider PRIVATE ${PLASMA_POTD_PROVIDER_CORE})
+endif()
 
 # Install the plugin to /usr/lib (not /usr/local)
 set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install path prefix" FORCE)
