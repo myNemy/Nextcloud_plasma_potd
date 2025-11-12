@@ -96,8 +96,8 @@ set_target_properties(plasma_potd_nextcloudprovider PROPERTIES
 )
 
 target_include_directories(plasma_potd_nextcloudprovider PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/plugins/providers
     ${POTD_PROVIDER_INCLUDE_DIR}
-    plugins/providers
 )
 
 target_link_libraries(plasma_potd_nextcloudprovider PRIVATE
