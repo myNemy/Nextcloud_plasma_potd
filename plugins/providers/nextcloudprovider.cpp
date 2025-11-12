@@ -240,6 +240,23 @@ void NextcloudProvider::propfindRequestFinished(QNetworkReply *reply)
         return;
     }
 
+    // IMPORTANT: Invalidate cache BEFORE selecting random image
+    // This ensures that potd will use the correct image for preview
+    // If we invalidate after, potd might generate preview from old cache
+    const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + QStringLiteral("/plasma_engine_potd/");
+    const QString cacheFile = cacheDir + QStringLiteral("nextcloud");
+    
+    if (QFile::exists(cacheFile)) {
+        // Set modification time to 2 days ago to invalidate cache
+        QFile file(cacheFile);
+        if (file.open(QIODevice::ReadWrite)) {
+            QDateTime oldDate = QDateTime::currentDateTime().addDays(-2);
+            file.setFileTime(oldDate, QFileDevice::FileModificationTime);
+            file.close();
+            qCDebug(WALLPAPERPOTD) << "Invalidated cache file before image selection (set mod time to 2 days ago):" << cacheFile;
+        }
+    }
+
     // Shuffle the list for random order
     std::shuffle(m_imageUrls.begin(), m_imageUrls.end(), *QRandomGenerator::global());
 
@@ -281,6 +298,22 @@ void NextcloudProvider::fetchImagesFromLocal()
         return;
     }
 
+    // IMPORTANT: Invalidate cache BEFORE selecting random image
+    // This ensures that potd will use the correct image for preview
+    const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + QStringLiteral("/plasma_engine_potd/");
+    const QString cacheFile = cacheDir + QStringLiteral("nextcloud");
+    
+    if (QFile::exists(cacheFile)) {
+        // Set modification time to 2 days ago to invalidate cache
+        QFile file(cacheFile);
+        if (file.open(QIODevice::ReadWrite)) {
+            QDateTime oldDate = QDateTime::currentDateTime().addDays(-2);
+            file.setFileTime(oldDate, QFileDevice::FileModificationTime);
+            file.close();
+            qCDebug(WALLPAPERPOTD) << "Invalidated cache file before image selection (local, set mod time to 2 days ago):" << cacheFile;
+        }
+    }
+
     // Shuffle the list for random order
     std::shuffle(m_imageUrls.begin(), m_imageUrls.end(), *QRandomGenerator::global());
 
@@ -302,7 +335,9 @@ void NextcloudProvider::selectRandomImage()
     m_selectedImageUrl = m_imageUrls.at(index);
     qCDebug(WALLPAPERPOTD) << "Selected random image" << index << "of" << m_imageUrls.size() << ":" << m_selectedImageUrl;
 
-    // Set remoteUrl to the selected image URL
+    // CRITICAL: Set remoteUrl IMMEDIATELY after selection
+    // This ensures that if potd queries remoteUrl() for preview generation,
+    // it will get the correct image URL, not an empty or cached one
     if (m_selectedImageUrl.startsWith(QStringLiteral("http://")) || m_selectedImageUrl.startsWith(QStringLiteral("https://"))) {
         m_remoteUrl = QUrl(m_selectedImageUrl);
     } else {
@@ -310,8 +345,11 @@ void NextcloudProvider::selectRandomImage()
         m_remoteUrl = QUrl::fromLocalFile(m_selectedImageUrl);
     }
     
-    // Set optional metadata fields
+    // Also set title immediately so preview shows correct filename
     QFileInfo fileInfo(m_selectedImageUrl);
+    m_title = fileInfo.fileName();
+    
+    // Set optional metadata fields
     
     // infoUrl: URL to the Nextcloud folder or the image itself
     if (m_useLocalPath) {
@@ -325,10 +363,8 @@ void NextcloudProvider::selectRandomImage()
         qCDebug(WALLPAPERPOTD) << "Building InfoUrl - baseUrl:" << m_nextcloudUrl << "path:" << m_nextcloudPath << "InfoUrl:" << m_infoUrl.toString();
     }
     
-    // title: filename without path
-    m_title = fileInfo.fileName();
-    
     // author: Nextcloud username (if available) or empty
+    // Note: title was already set immediately after image selection above
     m_author = m_username.isEmpty() ? QString() : m_username;
     
     // Debug: Log metadata fields to verify they are set before finished() is emitted
@@ -337,23 +373,9 @@ void NextcloudProvider::selectRandomImage()
                            << "Title:" << m_title
                            << "Author:" << m_author;
     
-    // Invalidate cache for next time potd checks
-    // This ensures that the NEXT time potd checks (at midnight or manual refresh),
-    // the cache will be invalid and potd will create a new provider instance
-    // with a different random image.
-    const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + QStringLiteral("/plasma_engine_potd/");
-    const QString cacheFile = cacheDir + QStringLiteral("nextcloud");
-    
-    if (QFile::exists(cacheFile)) {
-        // Set modification time to 2 days ago to invalidate cache
-        QFile file(cacheFile);
-        if (file.open(QIODevice::ReadWrite)) {
-            QDateTime oldDate = QDateTime::currentDateTime().addDays(-2);
-            file.setFileTime(oldDate, QFileDevice::FileModificationTime);
-            file.close();
-            qCDebug(WALLPAPERPOTD) << "Invalidated cache file in selectRandomImage (set mod time to 2 days ago):" << cacheFile;
-        }
-    }
+    // Note: Cache invalidation is now done BEFORE selectRandomImage() is called
+    // (in propfindRequestFinished() or fetchImagesFromLocal())
+    // This ensures potd generates preview from the correct image
 
     // Download image if it's a URL, or load directly if it's a local path
     if (m_selectedImageUrl.startsWith(QStringLiteral("http://")) || m_selectedImageUrl.startsWith(QStringLiteral("https://"))) {

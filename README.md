@@ -10,6 +10,9 @@ Provider for the KDE Plasma "Picture of the Day" plugin that allows using images
 - ✅ **Random Selection**: Randomly selects images from the folder
 - ✅ **Recursive Search**: Searches for images in all subfolders
 - ✅ **Image Limit**: Option to limit the number of images loaded
+- ✅ **Metadata Support**: Populates Author, InfoUrl, RemoteUrl, and Title in JSON cache
+- ✅ **URL Normalization**: Automatically handles URL formatting (removes double slashes)
+- ✅ **Preview Synchronization**: Preview matches the selected image
 - ⚠️ **Automatic Rotation**: Not available (see [docs/CHANGE_IMAGE.md](docs/CHANGE_IMAGE.md))
 
 ## Requirements
@@ -172,6 +175,11 @@ LocalPath=/home/user/Nextcloud/Images
 MaxImages=0  # Maximum number of images to load (0 = unlimited)
 ```
 
+**Note**: The URL and Path values are automatically normalized:
+- Trailing slashes in URL are removed
+- Leading slashes in Path are added if missing
+- This prevents double slashes in generated URLs
+
 See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for complete details.
 
 ## Compilation
@@ -199,3 +207,6 @@ sudo make install
 - [docs/WHEN_LIST_UPDATES.md](docs/WHEN_LIST_UPDATES.md) - When the list is created/updated
 - [docs/UNINSTALL.md](docs/UNINSTALL.md) - How to remove the provider
 - [docs/CHANGELOG.md](docs/CHANGELOG.md) - Changelog
+- [docs/JSON_FIELDS.md](docs/JSON_FIELDS.md) - Available JSON cache fields
+- [docs/CACHE_JSON_ANALYSIS.md](docs/CACHE_JSON_ANALYSIS.md) - JSON cache analysis
+- [docs/COMPLIANCE_REPORT.md](docs/COMPLIANCE_REPORT.md) - API compliance report
