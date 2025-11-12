@@ -7,6 +7,7 @@ sudo rm -f /usr/local/lib/qt6/plugins/potd/plasma_potd_nextcloudprovider.so
 sudo rm -f /usr/local/lib/qt6/plugins/potd/nextcloudprovider.json
 
 # 2. Ricompila e installa
+mkdir -p build
 cd build
 rm -rf *
 cmake ..

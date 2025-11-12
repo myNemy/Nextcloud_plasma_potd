@@ -2,6 +2,8 @@
 
 Provider for the KDE Plasma "Picture of the Day" plugin that allows using images from Nextcloud.
 
+> **⚠️ Warning**: This project is experimental. Use at your own risk. It may contain bugs or unexpected behavior.
+
 ## Features
 
 - ✅ **WebDAV Support**: Direct connection to Nextcloud via WebDAV
