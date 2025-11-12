@@ -23,8 +23,6 @@ find_library(PLASMA_POTD_PROVIDER_CORE
         /usr/local/lib
         /usr/local/lib64
         /usr/lib/x86_64-linux-gnu
-        ${Qt6_DIR}/../../../lib
-        ${Qt6_DIR}/../../../lib/x86_64-linux-gnu
     PATH_SUFFIXES
         x86_64-linux-gnu
         lib64
@@ -33,12 +31,17 @@ find_library(PLASMA_POTD_PROVIDER_CORE
     NO_DEFAULT_PATH
 )
 
-# Also try default paths
+# Also try default paths (without NO_DEFAULT_PATH)
 if(NOT PLASMA_POTD_PROVIDER_CORE)
     find_library(PLASMA_POTD_PROVIDER_CORE
         NAMES plasmapotdprovidercore
+        PATHS
+            /usr/lib
+            /usr/lib64
+            /usr/local/lib
+            /usr/local/lib64
     )
-endif
+endif()
 
 # Try pkg-config as fallback
 if(NOT PLASMA_POTD_PROVIDER_CORE)
