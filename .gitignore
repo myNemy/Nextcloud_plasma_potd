@@ -37,7 +37,7 @@ Thumbs.db
 COMMIT_MESSAGE.txt
 
 # Reference files (copied from kdeplasma-addons, not modified)
-plugins/providers/potdprovider.h
+# Note: potdprovider.h is now tracked in git for Ubuntu 25.04 compatibility
 
 # Documentation
 docs/
