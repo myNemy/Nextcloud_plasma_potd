@@ -43,8 +43,10 @@ sudo pacman -S cmake qt6-base qt6-network qt6-gui kf6-coreaddons kf6-config kf6-
 
 On Debian/Ubuntu:
 ```bash
-sudo apt install cmake qt6-base-dev qt6-base-dev-tools libkf6coreaddons-dev libkf6config-dev libkf6kio-dev kdeplasma-addons-dev
+sudo apt install cmake qt6-base-dev qt6-base-dev-tools libkf6coreaddons-dev libkf6config-dev libkf6kio-dev kdeplasma-addons libkf6plasma-dev plasma-workspace-dev
 ```
+
+**Note for Ubuntu 25.04+**: The `kdeplasma-addons-dev` package doesn't exist. Install `kdeplasma-addons` (runtime) and `libkf6plasma-dev` + `plasma-workspace-dev` (development headers). If `potdprovider.h` is still not found, you may need to build `kdeplasma-addons` from source or use the file from this repository (`plugins/providers/potdprovider.h`).
 
 On Fedora:
 ```bash
