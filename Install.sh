@@ -167,5 +167,19 @@ sudo make install
 # 3. Verifica che sia in /usr/lib (non /usr/local)
 ls -la /usr/lib/qt6/plugins/potd/ | grep nextcloud
 
-# 4. Riavvia Plasma
-killall plasmashell && kstart plasmashell
+# 4. Riavvia Plasma (solo se c'è un display disponibile)
+if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+    echo "Restarting Plasma..."
+    killall plasmashell 2>/dev/null || true
+    sleep 1
+    if command -v kstart &> /dev/null; then
+        kstart plasmashell 2>/dev/null || true
+    elif command -v plasmashell &> /dev/null; then
+        plasmashell & 2>/dev/null || true
+    fi
+    echo -e "${GREEN}✓${NC} Plasma restart initiated"
+else
+    echo -e "${YELLOW}Note: No display available. Please restart Plasma manually:${NC}"
+    echo "  killall plasmashell && kstart plasmashell"
+    echo "  Or log out and log back in"
+fi
