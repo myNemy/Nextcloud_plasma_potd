@@ -53,7 +53,7 @@ if(NOT PLASMA_POTD_PROVIDER_CORE)
             message(STATUS "Found plasmapotdprovidercore via pkg-config: ${PLASMA_POTD_PROVIDER_CORE}")
         endif()
     endif()
-endif
+endif()
 
 # Find potdprovider.h - try system first, then fallback to included file
 find_path(POTD_PROVIDER_INCLUDE_DIR
